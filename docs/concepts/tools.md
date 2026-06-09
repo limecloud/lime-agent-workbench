@@ -25,7 +25,7 @@ evidence.changed?
 | 字段 | 用途 |
 | --- | --- |
 | `toolCallId` | 关联 args、progress、result、failure。 |
-| `stepId` | 挂到 ProcessTree。 |
+| `stepId` | 关联 ProcessTimeline entry 和 ExecutionGraph step node。 |
 | `status` | pending、running、waiting、completed、failed、cancelled。 |
 | `inputSummary` | 安全摘要，不含 secret。 |
 | `outputRef` | 大输出或原始输出引用。 |

@@ -28,7 +28,7 @@ AgentUI 消费执行事实并投影用户界面。
   <div class="overview-arrow">→</div>
   <div class="overview-lane">
     <strong>AgentUI</strong>
-    <span>MessageParts / ProcessTree / ToolGroup / Evidence</span>
+    <span>UIMessageParts / ProcessTimeline / ExecutionGraph / Evidence</span>
   </div>
   <div class="overview-arrow">→</div>
   <div class="overview-lane">
@@ -67,8 +67,8 @@ Lime 不排斥外部协议，但内部标准必须服务现有代码库和治理
     <p>SessionSnapshot、ThreadReadModel、TaskSnapshot 支撑旧会话恢复和快速首屏。</p>
   </div>
   <div class="contract-card">
-    <h3>ProcessTree / ViewTree</h3>
-    <p>过程组件必须消费 runtime 节点关系，不从正文或日志缩进推断。</p>
+    <h3>Process Projection</h3>
+    <p>过程表面由 UIMessageParts、ProcessTimeline 和 ExecutionGraph 共同表达，不引入非标准组件树协议。</p>
   </div>
   <div class="contract-card">
     <h3>Tool UI</h3>
@@ -96,7 +96,7 @@ Lime 不排斥外部协议，但内部标准必须服务现有代码库和治理
 
 - 同一个事实在 runtime、UI、evidence、review 中各有一套版本。
 - 工具成功、审批结果、artifact 类型和 evidence verdict 无法可信追踪。
-- Content Studio、Zhongcao、Agent Apps 重复开发 ProcessTree、ToolGroup、ActionRequired。
+- Content Studio、Zhongcao、Agent Apps 重复开发过程组件、ToolGroup、ActionRequired。
 - Provider Key、Host capability、App Server DB 的所有权变得模糊。
 - 旧会话无法可靠恢复，回放和审查无法复用。
 
@@ -122,7 +122,7 @@ sequenceDiagram
   Runtime-->>UI: model.delta / tool.* / action.*
   Runtime-->>UI: artifact.changed / evidence.changed
   Runtime-->>UI: snapshot.updated
-  UI-->>App: MessageParts / ProcessTree / ToolGroup / EvidenceRef
+  UI-->>App: UIMessageParts / ProcessTimeline / ExecutionGraph / ToolGroup / EvidenceRef
 ```
 
 ## 支持的集成
@@ -221,14 +221,14 @@ const state = projectRuntimeFacts({
 });
 ```
 
-ProcessTree、ToolGroup、ActionRequired、ArtifactRef、EvidenceRef 共享同一套投影状态。
+UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、ActionRequired、ArtifactRef、EvidenceRef 共享同一套投影状态。
 
 ## 探索 Lime Agent Workbench
 
 - [核心架构](/concepts/architecture)
 - [Runtime 事件契约](/contracts/runtime-event)
 - [UI 投影契约](/contracts/ui-projection)
-- [ViewTree / ProcessTree 草案](/drafts/viewtree)
+- [Process Projection 草案](/drafts/process-projection)
 - [Content Studio 接入教程](/tutorials/content-studio)
 
 ## 资源

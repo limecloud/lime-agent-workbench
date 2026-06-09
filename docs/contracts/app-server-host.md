@@ -23,12 +23,40 @@ App Server 是 Lime runtime current 写入边界。Desktop Host 和 产品应用
 - 写入 runtime events、read models、artifact/evidence refs。
 - 对 产品应用 fail closed，不从本地 key/env key 偷读凭证。
 
+## Current JSON-RPC 面
+
+| 方法 | 方向 | 说明 |
+| --- | --- | --- |
+| `agentSession/turn/start` | product -> runtime | 提交用户 intent、业务 refs、provider/model preference。 |
+| `agentSession/turn/cancel` | product -> runtime | 取消 turn 或 active run。 |
+| `agentSession/action/respond` | product -> action owner | 回复审批、结构化输入、plan review。 |
+| `agentSession/event/subscribe` | runtime -> client | 订阅 RuntimeEvent stream。 |
+| `agentSession/read/thread` | client -> runtime | 读取 ThreadReadModel。 |
+| `agentSession/read/task` | client -> runtime | 读取 TaskSnapshot。 |
+| `agentSession/evidence/export` | client -> evidence owner | 导出 evidence pack。 |
+
+具体命名可随 Lime App Server 当前协议调整，但语义必须保持：写入事实走 RuntimeCore / owner service，读取状态走 read model，UI 不直接写 DB。
+
 ## 产品应用 responsibilities
 
 - 提供业务上下文。
 - 发起 turn、cancel、resume、respond action。
 - 消费 AgentUI 投影。
 - 在 hosted mode 下迁移旧 key 后清除本地 key。
+
+## Host Snapshot
+
+Host Snapshot 至少应暴露：
+
+| 字段 | 用途 |
+| --- | --- |
+| `appServer.ready` | 判断 runtime 是否可用。 |
+| `provider.ready` | 判断是否需要进入设置。 |
+| `capabilities` | 判断模型、工具、文件、网络、浏览器等能力是否可用。 |
+| `policy` | 判断 sandbox、permission、hosted mode 限制。 |
+| `dataRoot` | 只用于显示和 diagnostics，不让产品应用拼路径读写。 |
+
+Host Snapshot 不是 runtime read model。它描述平台宿主状态，不描述 turn/tool/action/artifact 的业务事实。
 
 ## 必需失败模式
 

@@ -20,7 +20,7 @@ description: 如何检查 Lime Agent 事件、读模型和投影问题。
 
 | 现象 | 优先检查 |
 | --- | --- |
-| 过程树混乱 | `stepId`、parent relation、sequence。 |
+| 过程表面混乱 | `stepId`、parent relation、sequence。 |
 | 工具状态不可信 | `toolCallId`、`tool.result` / `tool.failed`。 |
 | 审批卡片消失 | `actionId`、pending actions read model。 |
 | 旧会话恢复慢 | window detail、timeline pagination。 |

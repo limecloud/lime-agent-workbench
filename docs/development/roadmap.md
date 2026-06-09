@@ -28,8 +28,8 @@ Status: current
 
 目标：
 
-- 对齐 MessageParts、ProcessTree、ToolGroup、ActionRequired、ArtifactRef、EvidenceRef。
-- 明确 ViewTree 节点模型。
+- 对齐 UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、ActionRequired、ArtifactRef、EvidenceRef。
+- 明确过程投影模型，不引入非标准组件树协议。
 - 给 Content Studio 迁移 checklist。
 
 ## 阶段 3：App Server Runtime 一致性
@@ -44,7 +44,7 @@ Status: current
 
 目标：
 
-- 扫描 产品应用s 的 local ProcessTree / ToolGroup / runtime mock。
+- 扫描产品应用的 local process component / ToolGroup / runtime mock。
 - 扫描 hosted mode key leakage。
 - 扫描 legacy executionEvents 被当 truth 的路径。
 - 把 compat 退出条件写入每个产品 剖面。

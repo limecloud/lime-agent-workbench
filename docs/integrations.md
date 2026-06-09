@@ -44,6 +44,6 @@ Lime Agent Workbench 的集成不是“装一个 SDK”。它要求接入方选�
 | --- | --- | --- |
 | Module-local message cache | `compat` | 只做 hydration cache，最终状态来自 read model。 |
 | `executionEvents` text list | `compat` | 转为 投影 input，缺字段标记 unknown。 |
-| Local ProcessTree component | `deprecated` | 迁到共享 AgentUI ProcessTree。 |
+| Local process component | `deprecated` | 迁到共享 AgentUI ProcessTimeline / ExecutionGraph。 |
 | Local Provider Key store | `compat` in standalone, `deprecated` in hosted mode | 平台宿主下迁到 Provider store 后清除本地 key。 |
 | Mock runtime in production | `dead` | fail closed，改为 needs-setup 或 unavailable。 |

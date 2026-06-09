@@ -28,7 +28,38 @@ Conformance 不是“页面看起来能聊”。它要求 runtime facts、read m
 7. 缺失 runtime fact 显示 unknown/unavailable/stale/blocked。
 8. 产品应用 payload 不含 key/token/secret。
 9. Production path 不依赖 mock fallback。
-10. Existing local ProcessTree/ToolGroup 标为 deprecated 或迁到共享 AgentUI。
+10. Existing local process component / ToolGroup 标为 deprecated 或迁到共享 AgentUI。
+
+## Fixture 矩阵
+
+| Fixture | RuntimeEvent | ReadModel | Projection | UI |
+| --- | --- | --- | --- | --- |
+| `text-basic` | lifecycle + model delta/final | thread completed | UIMessageParts final | conversation 正常。 |
+| `tool-success` | tool started/args/progress/result | tool summary/ref | ToolGroup + timeline | tool 输出可展开。 |
+| `tool-failure` | tool failed + failure category | incident | failed attention | recovery action 可见。 |
+| `approval` | action required/resolved | pending action | ActionRequired | 未 resolved 前保持 waiting。 |
+| `artifact-evidence` | artifact/evidence changed | refs summary | artifact/evidence lane | 可跳转 owner surface。 |
+| `stream-repair` | sequence gap / snapshot updated | stale -> live | repair/reconcile | 不重复追加文本。 |
+| `subagent-job` | task/subagent/job events | task snapshot | ExecutionGraph | work board 可见。 |
+
+## 包级验收
+
+| 包 | 验收 |
+| --- | --- |
+| `@limecloud/agent-ui-contracts` | schema 与 fixtures 能校验；破坏性字段变更有版本说明。 |
+| `@limecloud/agent-ui-projection` | reducer 幂等、乱序降级、hydration repair、final reconciliation 有单测。 |
+| `@limecloud/agent-ui-react` | 组件不直接订阅 runtime stream，不读 Provider，不写 runtime truth。 |
+| `@limecloud/agent-runtime-client` | JSON-RPC / host bridge / SSE transport 有统一错误模型，不回退 mock。 |
+
+## 产品剖面验收
+
+每个产品应用剖面必须写清：
+
+- 使用哪些 shared surfaces。
+- 哪些旧路径是 `compat`，退出条件是什么。
+- hosted mode 下 Provider Key 如何迁到 Provider store。
+- 断流、未配置 Provider、权限阻断如何展示。
+- 哪些 fixture 证明该产品接入符合标准。
 
 ## 建议检查
 
@@ -36,3 +67,11 @@ Conformance 不是“页面看起来能聊”。它要求 runtime facts、read m
 - Contract tests for App Server client and AgentUI reducer。
 - Fixture replay for active run、tool failure、approval、artifact、evidence、hydration。
 - Governance scan for deprecated imports and mock production fallback。
+
+## 不可声明 conformant 的情况
+
+- 只支持聊天文本，不支持 tool/action/artifact/evidence facts。
+- 生产入口依赖 mock runtime。
+- 产品应用保存 Provider Key 并绕过 App Server。
+- UI 从 prose 推断运行结果。
+- 旧路径没有退出条件。

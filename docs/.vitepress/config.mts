@@ -109,6 +109,7 @@ export default defineConfig({
           { text: "Middleware", link: "/concepts/middleware" },
           { text: "消息", link: "/concepts/message-parts" },
           { text: "Reasoning", link: "/concepts/reasoning" },
+          { text: "过程投影", link: "/concepts/process-tree" },
           { text: "状态管理", link: "/concepts/state-and-hydration" },
           { text: "Interrupts", link: "/concepts/human-in-the-loop" },
           { text: "Serialization", link: "/concepts/serialization" },
@@ -131,7 +132,7 @@ export default defineConfig({
         text: "草案提案",
         items: [
           { text: "总览", link: "/drafts/" },
-          { text: "ViewTree / ProcessTree", link: "/drafts/viewtree" },
+          { text: "Process Projection", link: "/drafts/process-projection" },
           { text: "Meta Events", link: "/drafts/meta-events" }
         ]
       },

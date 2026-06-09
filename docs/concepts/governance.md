@@ -39,7 +39,7 @@ description: 用 current / compat / deprecated / dead 收敛 Lime Agent 标准�
 | Electron Host bridge transport | `current bridge` |
 | Local `messages` cache | `compat` |
 | Local `executionEvents` text list | `compat` |
-| Module-local ProcessTree / ToolGroup | `deprecated` |
+| Module-local process component / ToolGroup | `deprecated` |
 | UI-only completion/evidence state | `deprecated` |
 | 产品应用 Provider Key store in hosted mode | `deprecated` |
 | Production mock runtime fallback | `dead` |

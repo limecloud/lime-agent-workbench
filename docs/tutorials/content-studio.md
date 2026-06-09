@@ -14,7 +14,7 @@ Content Studio 的目标不是重做聊天页，而是把 `AI agents` 工作台�
 3. 只传业务上下文、provider/model preference，不传 key。
 4. 订阅 RuntimeEvent stream。
 5. 读取 ThreadReadModel / TaskSnapshot。
-6. 使用共享 AgentUI 投影 渲染 MessageParts、ProcessTree、ToolGroup、ActionRequired、ArtifactRef、EvidenceRef。
+6. 使用共享 AgentUI 投影渲染 UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、ActionRequired、ArtifactRef、EvidenceRef。
 
 ## 兼容路径
 

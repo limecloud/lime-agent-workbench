@@ -35,7 +35,7 @@ Content Studio 不拥有：
 
 - Provider Key。
 - RuntimeEvent、ThreadReadModel、TaskSnapshot。
-- ProcessTree、ToolGroup、ActionRequired 的协议模型。
+- UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、ActionRequired 的协议模型。
 - evidence/replay/review verdict。
 - App Server DB。
 

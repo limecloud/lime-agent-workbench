@@ -11,11 +11,11 @@ Reasoning 不等于最终回答。Lime UI 需要展示可解释过程，但不�
 
 | 来源事实 | UI 表面 |
 | --- | --- |
-| `reasoning.delta` | active ProcessTree。 |
-| `reasoning.summary` | 折叠过程摘要。 |
+| `reasoning.delta` | active ProcessTimeline entry。 |
+| `reasoning.summary` | UIMessageParts reasoning part，默认折叠。 |
 | `run.status` | runtime status。 |
-| `plan.delta` / `plan.final` | plan review 或 process node。 |
-| `model.delta` | final answer MessageParts。 |
+| `plan.delta` / `plan.final` | plan review 或 ProcessTimeline entry。 |
+| `model.delta` | final answer UIMessageParts。 |
 
 Reasoning 默认不进入最终正文。最终正文只来自明确的 answer/text facts。
 

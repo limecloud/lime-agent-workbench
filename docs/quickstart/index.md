@@ -48,4 +48,4 @@ submit turn
   -> evidence/artifact refs visible
 ```
 
-只有这条链路跑通，ProcessTree、ToolGroup、ViewTree、Timeline、Evidence lane 才有稳定事实可消费。
+只有这条链路跑通，UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、Evidence lane 才有稳定事实可消费。
