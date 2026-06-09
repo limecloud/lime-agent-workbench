@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Lime Agent Workbench">
+  <rect width="64" height="64" rx="14" fill="#12231d"/>
+  <path d="M16 44V18h8v19h24v7H16z" fill="#7ac7a6"/>
+  <path d="M31 18h17v7H31v7h13v7H23V18h8z" fill="#f4d35e"/>
+</svg>

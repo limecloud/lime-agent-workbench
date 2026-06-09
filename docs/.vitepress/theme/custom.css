@@ -1,0 +1,147 @@
+:root {
+  --vp-c-brand-1: #111827;
+  --vp-c-brand-2: #374151;
+  --vp-c-brand-3: #6b7280;
+  --vp-c-brand-soft: rgba(17, 24, 39, 0.08);
+  --vp-layout-max-width: 1450px;
+  --vp-sidebar-width: 300px;
+}
+
+.dark {
+  --vp-c-brand-1: #f9fafb;
+  --vp-c-brand-2: #e5e7eb;
+  --vp-c-brand-3: #9ca3af;
+  --vp-c-brand-soft: rgba(249, 250, 251, 0.1);
+}
+
+.VPNavBar {
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.VPNavBar .container {
+  max-width: 1450px;
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: 760px;
+}
+
+.VPDoc .content {
+  padding-top: 42px;
+}
+
+.VPDoc h1 {
+  letter-spacing: 0;
+}
+
+.VPDoc h2 {
+  margin-top: 42px;
+  border-top: 0;
+}
+
+.VPSidebar {
+  padding-top: 18px;
+}
+
+.VPSidebarItem.level-0 > .item > .text {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.VPSidebarItem.level-1 > .item > .text {
+  font-size: 14px;
+}
+
+.hero-grid,
+.contract-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 28px 0;
+}
+
+.overview-diagram {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin: 32px 0;
+}
+
+.overview-lane {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--vp-c-bg-soft);
+}
+
+.overview-lane strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.overview-lane span {
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+
+.overview-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--vp-c-text-3);
+}
+
+.hero-card,
+.contract-card,
+.principle-card {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--vp-c-bg-soft);
+}
+
+.hero-card h3,
+.contract-card h3,
+.principle-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.hero-card p,
+.contract-card p,
+.principle-card p {
+  margin: 0;
+  color: var(--vp-c-text-2);
+}
+
+.classification-table td:first-child {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.mermaid-diagram {
+  overflow-x: auto;
+  margin: 24px 0;
+  padding: 16px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  .hero-grid,
+  .contract-grid,
+  .overview-diagram {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-arrow {
+    display: none;
+  }
+}
