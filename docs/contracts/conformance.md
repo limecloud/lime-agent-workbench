@@ -47,8 +47,8 @@ Conformance 不是“页面看起来能聊”。它要求 runtime facts、read m
 | 包 | 验收 |
 | --- | --- |
 | `@limecloud/agent-ui-contracts` | schema 与 fixtures 能校验；破坏性字段变更有版本说明。 |
-| `@limecloud/agent-ui-projection` | reducer 幂等、乱序降级、hydration repair、final reconciliation 有单测。 |
-| `@limecloud/agent-ui-react` | 组件不直接订阅 runtime stream，不读 Provider，不写 runtime truth。 |
+| `@limecloud/agent-runtime-projection` | projector 幂等、乱序降级、hydration repair、final reconciliation 有单测。 |
+| `@limecloud/agent-runtime-ui` | 组件不直接订阅 runtime stream，不读 Provider，不写 runtime truth。 |
 | `@limecloud/agent-runtime-client` | JSON-RPC / host bridge / SSE transport 有统一错误模型，不回退 mock。 |
 
 ## 产品剖面验收

@@ -60,7 +60,7 @@ App Server 可以把具体方法命名成 Lime 当前协议，但不能让产品
 | SSE / event stream | RuntimeEvent 订阅 | 保留 `sequence`、cursor、repair 语义。 |
 | Fixture replay | 测试 | 只能用于 conformance，不作为 production fallback。 |
 
-`@limecloud/agent-runtime-client` 负责隐藏这些 transport 差异；`@limecloud/agent-ui-react` 不直接接触 transport。
+`@limecloud/agent-runtime-client` 负责隐藏这些 transport 差异；`@limecloud/agent-runtime-ui` 不直接接触 transport。
 
 ## 产品应用 responsibilities
 

@@ -5,7 +5,7 @@ description: TypeScript UI 投影 helper 的边界。
 
 # UI 投影
 
-UI 投影 helper 由 `@limecloud/agent-ui-projection` 提供，把 RuntimeEvent / ReadModel 转为可渲染 ProjectionState。它必须能在 React 外运行，便于 fixture replay、CLI 调试和 reducer 单测。
+UI 投影 helper 由 `@limecloud/agent-runtime-projection` 提供，把 RuntimeEvent / ReadModel 转为可渲染 ProjectionState。它必须能在 React 外运行，便于 fixture replay、CLI 调试和 reducer 单测。
 
 ```ts
 const state = projector.apply(event, previousState);

@@ -37,7 +37,7 @@ AI SDK 的价值在于把用户可见消息拆成 `UIMessage.parts`，让 text�
 
 - `UIMessageParts` 只表达可读消息和可引用摘要。
 - Tool、Action、Artifact、Evidence 的完成状态仍来自 RuntimeEvent / owner service。
-- `agent-ui-projection` 可以把 Lime facts 映射成 AI SDK 风格的 parts，但不能把 parts 当 runtime truth。
+- `agent-runtime-projection` 可以把 Lime facts 映射成 AI SDK 风格的 parts，但不能把 parts 当 runtime truth。
 - 产品应用不能只接 AI SDK text stream 后绕过 App Server Provider store。
 
 ## OpenAI Agents JS 对 Lime 的启发

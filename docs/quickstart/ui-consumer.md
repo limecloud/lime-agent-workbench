@@ -22,8 +22,8 @@ Diagnostics
 
 | 用途 | 包 |
 | --- | --- |
-| Projection reducer / selectors | `@limecloud/agent-ui-projection` |
-| React surfaces / hooks | `@limecloud/agent-ui-react` |
+| Projection reducer / selectors | `@limecloud/agent-runtime-projection` |
+| React surfaces / hooks | `@limecloud/agent-runtime-ui` |
 | 共享类型 | `@limecloud/agent-ui-contracts` |
 
 ## 输出表面

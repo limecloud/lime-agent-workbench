@@ -26,7 +26,7 @@ Runtime 提供方 是 App Server / RuntimeCore 的执行来源，不是 UI adapt
 | 类型、schema、fixtures | `@limecloud/agent-ui-contracts` |
 | App Server client 侧集成测试 | `@limecloud/agent-runtime-client` |
 
-Runtime provider 不依赖 `@limecloud/agent-ui-react`，也不生成 React props。
+Runtime provider 不依赖 `@limecloud/agent-runtime-ui`，也不生成 React props。
 
 ## 最小事件顺序
 

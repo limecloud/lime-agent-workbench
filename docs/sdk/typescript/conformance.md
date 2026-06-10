@@ -12,8 +12,8 @@ Conformance 用来证明一个 runtime provider、projection reducer 或 React s
 | 包 | 必须提供 |
 | --- | --- |
 | `@limecloud/agent-ui-contracts` | schemas、fixtures、version helpers、validation errors。 |
-| `@limecloud/agent-ui-projection` | replay runner、idempotency assertions、selector snapshots。 |
-| `@limecloud/agent-ui-react` | surface render fixtures、callback contract tests。 |
+| `@limecloud/agent-runtime-projection` | replay runner、idempotency assertions、selector snapshots。 |
+| `@limecloud/agent-runtime-ui` | surface render fixtures、callback contract tests。 |
 | `@limecloud/agent-runtime-client` | transport contract tests、error mapping、mock-free production assertions。 |
 
 ## Fixture 格式
@@ -34,6 +34,14 @@ export interface AgentUiFixture {
     pendingActionCount?: number;
     artifactCount?: number;
     evidenceCount?: number;
+    teamWorkbench?: {
+      hasTeamSurface?: boolean;
+      rosterNodeCount?: number;
+      workItemCount?: number;
+      handoffEventCount?: number;
+      reviewEventCount?: number;
+      laneEventCount?: number;
+    };
     diagnostics?: string[];
   };
 }
@@ -108,6 +116,22 @@ Runtime client 的 transport tests 必须覆盖：
 | Evidence export | exportEvidence 返回 EvidenceRefView，并保留 correlation ids。 |
 | Production no mock | production transport 不依赖 fixture replay。 |
 
+Runtime client 只证明 transport、read/action/evidence facade 和错误模型。它不能生成 `AgentUiProjectionState`，也不能在缺少 App Server stream 时切到 fixture replay。
+
+## Projection conformance
+
+Projection replay 必须覆盖标准 surface 字段：
+
+| Surface field | 必须断言 |
+| --- | --- |
+| `messages` | `UIMessageParts` 按 message scope 合并，final text 不重复。 |
+| `timeline` | `ProcessTimeline` 按 event sequence / createdAt 稳定排序。 |
+| `graph` | `ExecutionGraph` 保留 turn、task、subagent、tool、action lineage。 |
+| `actions` | `ActionRequired` 只来自 unresolved action facts。 |
+| `artifacts` | `ArtifactRef` 只保存 refs 和轻量摘要。 |
+| `evidence` | `EvidenceRef` 保留 review / replay correlation。 |
+| `teamWorkbench` | `TeamWorkbench` 必填；solo run 输出空模型，多执行体 fixture 输出 roster/work/lane counts。 |
+
 ## React conformance
 
 React surfaces 用 fixture projection state 渲染，不自己跑 runtime。
@@ -119,6 +143,7 @@ React surfaces 用 fixture projection state 渲染，不自己跑 runtime。
 | ExecutionGraph | task/subagent parent-child edge 可见。 |
 | ActionRequired | 点击只调用 callback，不本地标记 resolved。 |
 | Artifact / Evidence lane | 只展示 refs，不复制大 payload。 |
+| TeamWorkbench | 只读取 `state.teamWorkbench`，不在组件内重建 roster、work board 或 handoff lane。 |
 | Diagnostics | unknown/unavailable/stale/blocked 可见。 |
 
 ## Definition of Done
@@ -136,10 +161,9 @@ React surfaces 用 fixture projection state 渲染，不自己跑 runtime。
 
 ```bash
 npm run test:contracts
-npm run test:agent-ui-fixtures
-npm run test:agent-ui-projection
-npm run test:agent-ui-react
+npm --prefix packages/agent-ui-contracts run test
+npm --prefix packages/agent-runtime-projection run test
+npm --prefix packages/agent-runtime-ui run test
 ```
 
 命令名称可按 Lime 主仓实际脚本调整，但四类检查必须存在：contract、fixture replay、projection reducer、React surface。
-

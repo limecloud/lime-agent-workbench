@@ -95,6 +95,7 @@ export default defineConfig({
             collapsed: false,
             items: [
               { text: "产品应用接入", link: "/quickstart/product-app" },
+              { text: "AgentUI 最小面板", link: "/quickstart/agentui-minimal-panel" },
               { text: "构建集成", link: "/quickstart/" },
               { text: "Runtime 提供方", link: "/quickstart/runtime-provider" },
               { text: "UI 消费方", link: "/quickstart/ui-consumer" }
@@ -111,7 +112,7 @@ export default defineConfig({
           { text: "Middleware", link: "/concepts/middleware" },
           { text: "消息", link: "/concepts/message-parts" },
           { text: "Reasoning", link: "/concepts/reasoning" },
-          { text: "过程投影", link: "/concepts/process-tree" },
+          { text: "ProcessTimeline / ExecutionGraph", link: "/concepts/process-tree" },
           { text: "状态管理", link: "/concepts/state-and-hydration" },
           { text: "Interrupts", link: "/concepts/human-in-the-loop" },
           { text: "Serialization", link: "/concepts/serialization" },
@@ -161,12 +162,71 @@ export default defineConfig({
             text: "TypeScript",
             items: [
               { text: "总览", link: "/sdk/typescript/overview" },
-              { text: "Package boundaries", link: "/sdk/typescript/package-boundaries" },
-              { text: "Core types", link: "/sdk/typescript/core-types" },
-              { text: "Runtime client", link: "/sdk/typescript/runtime-client" },
-              { text: "UI projection", link: "/sdk/typescript/ui-projection" },
-              { text: "React surfaces", link: "/sdk/typescript/react-surfaces" },
-              { text: "Conformance", link: "/sdk/typescript/conformance" }
+              {
+                text: "@limecloud/agent-ui-contracts",
+                collapsed: false,
+                items: [
+                  { text: "Overview", link: "/sdk/typescript/contracts/overview" },
+                  { text: "Types", link: "/sdk/typescript/contracts/types" },
+                  { text: "Events", link: "/sdk/typescript/contracts/events" },
+                  { text: "Event Families", link: "/sdk/typescript/contracts/event-families" },
+                  { text: "Projection State", link: "/sdk/typescript/contracts/projection-state" },
+                  { text: "Fixtures", link: "/sdk/typescript/contracts/fixtures" },
+                  { text: "Validation", link: "/sdk/typescript/contracts/validation" }
+                ]
+              },
+              {
+                text: "@limecloud/agent-runtime-client",
+                collapsed: false,
+                items: [
+                  { text: "Overview", link: "/sdk/typescript/runtime-client/overview" },
+                  { text: "AgentRuntimeClient", link: "/sdk/typescript/runtime-client/client" },
+                  { text: "Session Gateway", link: "/sdk/typescript/runtime-client/session-gateway" },
+                  { text: "Transport Contract", link: "/sdk/typescript/runtime-client/transport" },
+                  { text: "Events Subscription", link: "/sdk/typescript/runtime-client/events" },
+                  { text: "Errors", link: "/sdk/typescript/runtime-client/errors" }
+                ]
+              },
+              {
+                text: "@limecloud/agent-runtime-projection",
+                collapsed: false,
+                items: [
+                  { text: "Overview", link: "/sdk/typescript/projection/overview" },
+                  { text: "Projector", link: "/sdk/typescript/projection/projector" },
+                  { text: "App Server Facts", link: "/sdk/typescript/projection/app-server-facts" },
+                  { text: "Selectors", link: "/sdk/typescript/projection/selectors" },
+                  { text: "Fixture Replay", link: "/sdk/typescript/projection/fixture-replay" }
+                ]
+              },
+              {
+                text: "@limecloud/agent-runtime-ui",
+                collapsed: false,
+                items: [
+                  { text: "Overview", link: "/sdk/typescript/runtime-ui/overview" },
+                  { text: "Provider Boundary", link: "/sdk/typescript/runtime-ui/provider" },
+                  { text: "AgentUiProjectionView", link: "/sdk/typescript/runtime-ui/projection-view" },
+                  { text: "Message Parts", link: "/sdk/typescript/runtime-ui/message-parts" },
+                  { text: "Process Timeline", link: "/sdk/typescript/runtime-ui/process-timeline" },
+                  { text: "Execution Graph", link: "/sdk/typescript/runtime-ui/execution-graph" },
+                  { text: "Action Required", link: "/sdk/typescript/runtime-ui/action-required" },
+                  { text: "Artifact / Evidence Refs", link: "/sdk/typescript/runtime-ui/refs" },
+                  { text: "Callbacks", link: "/sdk/typescript/runtime-ui/callbacks" },
+                  { text: "Team Workbench", link: "/sdk/typescript/runtime-ui/team-workbench" }
+                ]
+              },
+              {
+                text: "Legacy planning pages",
+                collapsed: true,
+                items: [
+                  { text: "Package boundaries", link: "/sdk/typescript/package-boundaries" },
+                  { text: "Core types", link: "/sdk/typescript/core-types" },
+                  { text: "Runtime client", link: "/sdk/typescript/runtime-client" },
+                  { text: "UI projection", link: "/sdk/typescript/ui-projection" },
+                  { text: "React surfaces", link: "/sdk/typescript/react-surfaces" }
+                ]
+              },
+              { text: "Conformance", link: "/sdk/typescript/conformance" },
+              { text: "Conformance Runner", link: "/sdk/typescript/conformance/runner" }
             ]
           },
           {

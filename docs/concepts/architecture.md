@@ -31,8 +31,8 @@ flowchart TB
 
   subgraph SDK[Agent SDK Line]
     Contracts[@limecloud/agent-ui-contracts]
-    ProjectionPkg[@limecloud/agent-ui-projection]
-    ReactPkg[@limecloud/agent-ui-react]
+    ProjectionPkg[@limecloud/agent-runtime-projection]
+    ReactPkg[@limecloud/agent-runtime-ui]
     RuntimeClient[@limecloud/agent-runtime-client]
   end
 
@@ -121,8 +121,8 @@ sequenceDiagram
   participant Server as App Server
   participant Core as RuntimeCore
   participant Backend as ExecutionBackend
-  participant Projection as @limecloud/agent-ui-projection
-  participant React as @limecloud/agent-ui-react
+  participant Projection as @limecloud/agent-runtime-projection
+  participant React as @limecloud/agent-runtime-ui
 
   User->>Product: 输入任务
   Product->>Client: startTurn(input + business refs)
@@ -145,34 +145,34 @@ sequenceDiagram
 | 包 | 分类 | 职责 |
 | --- | --- | --- |
 | `@limecloud/agent-ui-contracts` | `current` | RuntimeEvent、read model、projection state、fixture 和 schema 类型。 |
-| `@limecloud/agent-ui-projection` | `current` | reducer、selector、hydration/reconciliation、UIMessageParts / ProcessTimeline / ExecutionGraph 投影。 |
-| `@limecloud/agent-ui-react` | `current` | React hooks、共享过程组件、消息/工具/审批/证据表面。 |
+| `@limecloud/agent-runtime-projection` | `current` | projector、fixture replay、App Server facts adapter、UIMessageParts / ProcessTimeline / ExecutionGraph 投影。 |
+| `@limecloud/agent-runtime-ui` | `current` | React projection view、消息/过程/执行图/审批/团队工作台共享表面。 |
 | `@limecloud/agent-runtime-client` | `current` | App Server JSON-RPC client、event subscription、read APIs、evidence export。 |
-| `@limecloud/agent-ui` | `optional facade` | 只允许 re-export UI contracts/projection/react；不承载真实实现，不包含 runtime transport。 |
+| `@limecloud/agent-ui` | `future facade` | 未来可选 re-export UI contracts/projection/runtime-ui；不承载真实实现，不包含 runtime transport。 |
 
 四包产品线是统一标准，不是统一成一个物理包。这样可以让产品应用只依赖 React 表面，测试和 CLI 只依赖 contracts/projection，runtime 集成只依赖 runtime client。
 
 ## 包依赖方向
 
 ```text
-@limecloud/agent-ui-react
-  -> @limecloud/agent-ui-projection
+@limecloud/agent-runtime-ui
+  -> @limecloud/agent-runtime-projection
   -> @limecloud/agent-ui-contracts
 
 @limecloud/agent-runtime-client
   -> @limecloud/agent-ui-contracts
 
 @limecloud/agent-ui
-  -> @limecloud/agent-ui-react
-  -> @limecloud/agent-ui-projection
+  -> @limecloud/agent-runtime-ui
+  -> @limecloud/agent-runtime-projection
   -> @limecloud/agent-ui-contracts
 ```
 
 禁止方向：
 
 - `agent-ui-contracts` 依赖 React、App Server client 或产品应用。
-- `agent-ui-projection` 依赖 React DOM、Electron、Provider SDK。
-- `agent-ui-react` 直接调用 Provider 或读 App Server DB。
+- `agent-runtime-projection` 依赖 React DOM、Electron、Provider SDK。
+- `agent-runtime-ui` 直接调用 Provider 或读 App Server DB。
 - `agent-runtime-client` 生成 UI projection state。
 
 ## 所有权 rule
@@ -193,9 +193,9 @@ UI 可以渲染事实、聚合事实、折叠事实，但不能写入 runtime tr
 
 | 现有 Lime 路径 | 分类 | 收敛目标 |
 | --- | --- | --- |
-| `packages/app-server-client` | `current seed` | 发布形态收敛为 `@limecloud/agent-runtime-client`。 |
-| `packages/agent-runtime-projection` | `current seed` | 命名和 API 收敛为 `@limecloud/agent-ui-projection`。 |
-| `packages/agent-runtime-ui` | `current seed` | React surfaces 收敛为 `@limecloud/agent-ui-react`。 |
-| `packages/agent-app-runtime/projection` | `compat/deprecated` | 投影 API 合并到 `agent-ui-projection` 后退出。 |
+| `packages/app-server-client` | `current dependency` | 由 `@limecloud/agent-runtime-client` 显式包裹和导出 current runtime client facade。 |
+| `packages/agent-runtime-projection` | `current` | 作为 Lime AgentUI projection 的物理实现包继续演进。 |
+| `packages/agent-runtime-ui` | `current` | 作为 Lime React AgentUI surfaces 的物理实现包继续演进。 |
+| `packages/agent-app-runtime/projection` | `compat/deprecated` | 投影 API 合并到 `@limecloud/agent-runtime-projection` 后退出。 |
 | 产品应用 local `messages` / `executionEvents` | `compat` | 只作为迁移缓存，最终由 RuntimeEvent / ReadModel 驱动。 |
 | 产品应用 local process component | `deprecated` | 迁到共享 ProcessTimeline / ExecutionGraph surfaces。 |

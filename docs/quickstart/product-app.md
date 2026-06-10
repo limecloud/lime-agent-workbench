@@ -21,10 +21,10 @@ description: 产品应用 如何接入共享 Runtime 和 AgentUI。
 | 用途 | 包 |
 | --- | --- |
 | 调 App Server / 订阅事件 | `@limecloud/agent-runtime-client` |
-| 渲染共享 surfaces | `@limecloud/agent-ui-react` |
+| 渲染共享 surfaces | `@limecloud/agent-runtime-ui` |
 | 业务侧测试 fixture | `@limecloud/agent-ui-contracts` |
 
-产品应用通常不直接依赖 `@limecloud/agent-ui-projection`，除非它在 React 外做 replay、导出或测试。
+产品应用通常不直接依赖 `@limecloud/agent-runtime-projection`，除非它在 React 外做 replay、导出或测试。
 
 ## Payload 边界
 
