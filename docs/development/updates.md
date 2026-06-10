@@ -5,6 +5,13 @@ description: Lime Agent Workbench 的变更记录。
 
 # 更新记录
 
+## v0.3.0 draft - 2026-06-10
+
+- 新增 `/subagents` 顶层标准页，固定 subagent、worker、task、channel、handoff、review 的 runtime facts 与 UI projection 边界。
+- 新增 TypeScript SDK 包边界、React surfaces、Conformance 页面，明确四包职责、依赖方向、fixture replay 和禁止方向。
+- 补强 Runtime 读模型、App Server Host、Runtime provider 文档，增加 hydration、snapshot repair、transport contract 和 subagent provider 要求。
+- 接入导航，作为 `v0.3.0` 标准化候选内容；正式发布前仍需运行构建并视需要同步版本号。
+
 ## v0.2.0 - 2026-06-09
 
 - 移除非标准组件树术语，统一过程投影为 `UIMessageParts`、`ProcessTimeline`、`ExecutionGraph`。

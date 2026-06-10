@@ -80,6 +80,7 @@ export default defineConfig({
     },
     nav: [
       { text: "文档", link: "/introduction" },
+      { text: "Subagents", link: "/subagents" },
       { text: "SDKs", link: "/sdk/typescript/overview" }
     ],
     sidebar: [
@@ -88,6 +89,7 @@ export default defineConfig({
         items: [
           { text: "Lime Agent 总览", link: "/introduction" },
           { text: "MCP、A2A 与 AG-UI", link: "/agentic-protocols" },
+          { text: "Subagents 标准", link: "/subagents" },
           {
             text: "Quickstart",
             collapsed: false,
@@ -159,9 +161,12 @@ export default defineConfig({
             text: "TypeScript",
             items: [
               { text: "总览", link: "/sdk/typescript/overview" },
+              { text: "Package boundaries", link: "/sdk/typescript/package-boundaries" },
               { text: "Core types", link: "/sdk/typescript/core-types" },
               { text: "Runtime client", link: "/sdk/typescript/runtime-client" },
-              { text: "UI projection", link: "/sdk/typescript/ui-projection" }
+              { text: "UI projection", link: "/sdk/typescript/ui-projection" },
+              { text: "React surfaces", link: "/sdk/typescript/react-surfaces" },
+              { text: "Conformance", link: "/sdk/typescript/conformance" }
             ]
           },
           {

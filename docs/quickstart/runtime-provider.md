@@ -112,3 +112,49 @@ LLM stream
 - 一个审批 turn 能挂起并通过 `respondAction` 恢复。
 - 一个失败 turn 能给出 failure category 和 recovery hint。
 - 断流后 read model 能修复 ProjectionState。
+
+## Provider conformance slice
+
+Runtime provider 接入完成前，至少准备一组可重放 fixture：
+
+```text
+text-basic
+tool-success
+tool-failure
+hitl-action
+artifact-evidence
+stream-repair
+subagent-handoff
+```
+
+每个 fixture 都应该同时验证三件事：
+
+1. RuntimeEvent schema 合法。
+2. ReadModel 能恢复 UI 首屏。
+3. Projection replay 不重复、不猜测、不丢失 refs。
+
+详细矩阵见 [TypeScript Conformance](/sdk/typescript/conformance) 和 [一致性验收](/contracts/conformance)。
+
+## Subagent provider
+
+如果 provider 支持多执行实体，必须输出 subagent/task/channel/handoff facts：
+
+```ts
+emit({
+  type: "subagent.started",
+  eventId,
+  sequence,
+  schemaVersion,
+  runtimeId,
+  sessionId,
+  taskId,
+  subagentId,
+  payload: {
+    role: "researcher",
+    parentTaskId,
+    title: "资料检索"
+  }
+});
+```
+
+子代理完成后，artifact/evidence refs 必须保留 `taskId / subagentId` correlation。UI 是否显示完整 Team Workbench 由 projection 决定，provider 不能用普通 assistant 正文代替这些 facts。

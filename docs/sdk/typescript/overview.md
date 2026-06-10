@@ -17,6 +17,8 @@ TypeScript SDK 是产品应用、AgentUI 和 Runtime 集成消费 Lime App Serve
 | `@limecloud/agent-runtime-client` | `current` | 调 App Server JSON-RPC、订阅 events、读取 read models、提交 action、导出 evidence。 |
 | `@limecloud/agent-ui` | `optional facade` | 只 re-export contracts/projection/react；不承载真实实现，不包含 runtime transport。 |
 
+详细包边界见 [Package boundaries](/sdk/typescript/package-boundaries)。React 组件与 hook 边界见 [React surfaces](/sdk/typescript/react-surfaces)。包级验收和 fixture replay 见 [Conformance](/sdk/typescript/conformance)。
+
 ## 为什么不统一成一个物理包
 
 统一的是标准和契约，不是发布形态。
@@ -36,6 +38,23 @@ TypeScript SDK 是产品应用、AgentUI 和 Runtime 集成消费 Lime App Serve
 | `packages/agent-app-runtime/projection` | `@limecloud/agent-ui-projection` | 合并投影 API，避免第二套 projection。 |
 
 当前仓库先定义文档边界。代码包以后必须从现有 Lime App Server client 和 AgentUI 实现收敛，不直接套外部 SDK。
+
+## API 分层
+
+| 层 | API 形态 | 单测重点 |
+| --- | --- | --- |
+| Contracts | TypeScript types、JSON schemas、fixtures。 | schema validation、breaking change、secret redaction。 |
+| Projection | `createAgentUiProjector`、reducers、selectors、hydration。 | replay 幂等、sequence repair、final reconciliation。 |
+| React | `AgentRunProvider`、shared surfaces、controlled callbacks。 | 渲染、交互接线、长文案布局、无 runtime 写入。 |
+| Runtime client | `createAgentRuntimeClient`、Host bridge、JSON-RPC、event subscription。 | transport error、mock-free production、action response、evidence export。 |
+
+## 最小落地顺序
+
+1. 先把 contracts 和 fixtures 固定下来。
+2. 用 fixture replay 驱动 projection reducer。
+3. React surfaces 只消费 projection view model。
+4. Runtime client 独立验证 App Server JSON-RPC / Host bridge。
+5. 产品应用最后接入，不把本地 process component 继续扩展成事实源。
 
 ## 发布与版本策略
 
