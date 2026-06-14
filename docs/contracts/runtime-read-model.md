@@ -107,7 +107,7 @@ Projection 可以从 read model 恢复可见状态，但 read model 不是 event
 | event stream 完整 | 按 event apply，read model 只作首屏和分页辅助。 |
 | sequence gap | Projection 标记 stale，client 读取 read model repair。 |
 | final text 与 delta 不一致 | 以 `model.completed` 或 read model final part 修正，不重复追加。 |
-| pending action 已解决 | 必须看到 `action.resolved` 或 read model pending list 移除。 |
+| pending action 已解决 | 必须看到 action terminal 或 read model pending list 移除。 |
 | artifact/evidence ref 缺失 | 标记 degraded，不从正文猜测 ref。 |
 
 ## 降级状态

@@ -41,8 +41,8 @@ standalone/dev 可以保留自托管 sidecar 作为 compat，但平台宿主下 
 | Provider key / token / secret | App Server Provider Store / 平台 Provider 设置。 |
 | Runtime facts | App Server RuntimeCore / ExecutionBackend。 |
 | Tool state machine | RuntimeEvent `tool.*` + read model。 |
-| Action completion | RuntimeEvent `action.required` / `action.resolved`。 |
-| Subagent lineage truth | TaskSnapshot / ExecutionGraph / TeamWorkbench projection。 |
+| Action completion | RuntimeEvent `action.required` / action terminal。 |
+| Subagent lineage truth | TaskSnapshot / ExecutionGraph / `AgentUiProjectionState.subagents` projection。 |
 | Artifact / Evidence truth | artifact service / evidence pack / review/replay owner。 |
 | App Server DB | App Server sidecar owner。 |
 | React runtime transport | `@limecloud/agent-runtime-client`，不是 UI 包。 |
@@ -66,10 +66,10 @@ standalone/dev 可以保留自托管 sidecar 作为 compat，但平台宿主下 
 | 执行过程 | `ProcessTimeline` | all RuntimeEvent by `sequence`。 |
 | 多步骤 / 工具 / 子任务结构 | `ExecutionGraph` | `turn/run/task/subagent/tool/action` ids。 |
 | 工具结果 | `ToolGroup` | `tool.started` / `tool.result` / `tool.failed`。 |
-| 人类介入 | `ActionRequired` | `action.required` / `action.resolved`。 |
+| 人类介入 | `ActionRequired` | `action.required` / action terminal。 |
 | Prompt 草稿 / 交付物 | `ArtifactRefList` + product artifact workspace | `artifact.changed` / artifact refs。 |
 | 证据 / replay / review | `EvidenceRefList` + evidence pack | `evidence.changed` / `review.verdict`。 |
-| 子代理 / 团队协作 | `TeamWorkbench` | `task.*` / `subagent.*` / `handoff.*` / `review.*`。 |
+| 子代理 / 团队协作 | `SubagentsView` | `task.*` / `subagent.*` / `handoff.*` / `review.*`。 |
 | 错误 / 缺事实 / stale | diagnostics + hydration state | `runtime.error` / `snapshot.updated` / read repair。 |
 
 ## 最小代码形态
@@ -122,7 +122,7 @@ import { AgentUiProjectionView } from "@limecloud/agent-runtime-ui";
 | `AgentPromptSession.messages` | `compat` | `UIMessageParts` | RuntimeEvent hydration 覆盖首屏恢复后只保留迁移读取。 |
 | local `executionEvents` | `compat` | `RuntimeEvent` / `ProcessTimeline` | App Server facts adapter 覆盖 tool/action/artifact/evidence 后停止扩展。 |
 | 模块内工具状态 | `deprecated` | `tool.*` facts + `ToolGroup` | 工具成功/失败可从 read model replay。 |
-| 模块内审批状态 | `deprecated` | `action.required/resolved` + `ActionRequired` | 所有审批按钮改为 `respondAction`。 |
+| 模块内审批状态 | `deprecated` | `action.required` + action terminal + `ActionRequired` | 所有审批按钮改为 `respondAction`。 |
 | 本地 artifact body 当 assistant 正文 | `deprecated` | `ArtifactRef` + artifact workspace | artifact owner 可打开并保留 source event。 |
 | 本地 evidence / review 报告 | `deprecated` | `EvidenceRef` + evidence pack | evidence export/review 可追溯到 runtime turn。 |
 | `ModelConfigStore` key | `compat` migration source | App Server provider store | 平台宿主迁移成功后本地 key 清除。 |
@@ -146,10 +146,10 @@ Content Studio 接入共享 AgentUI 时至少要证明：
 1. turn payload/env 不包含 key、token、secret。
 2. `providerPreference` / `modelPreference` 是非敏感 preference，不是 credential。
 3. RuntimeEvent 能投影到 MessageParts、ProcessTimeline、ExecutionGraph、ActionRequired、ArtifactRef、EvidenceRef。
-4. action 点击只调用 callback；完成态来自 `action.resolved`。
+4. action 点击只调用 callback；完成态来自 action terminal。
 5. artifact/evidence 只显示 ref；完整内容由产品 workspace 或 evidence pack 打开。
 6. 缺 App Server / Host / Provider 时 fail closed，不切 production mock。
-7. GUI 主路径接入后补产品 UI 回归和 GUI smoke。
+7. GUI 主路径接入后必须补产品 UI 回归和 GUI smoke；当前 Content Studio 已通过 `npm run test:e2e -- --grep "agents 将平台运行事实投影到 AgentUI 面板而不是普通正文"`，真实页面断言 `.agent-ui-projection`、`.agent-ui-main[data-agent-ui-surface="conversation"]` 和 `.agent-ui-sidecar[data-agent-ui-surface="runtime"]`。
 
 参考验证：
 

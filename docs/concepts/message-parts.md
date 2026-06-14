@@ -42,6 +42,15 @@ text.delta* -> text.final -> message part finalized
 
 不能在已流式输出文本后把 final completion 再追加一次。final event 应确认、修正或替换同一 `messageId/partId` 的内容。
 
+## Reconciliation 规则
+
+v2.11 需要把 AG-UI apply 层的深层规则落成 Lime projection 合同：
+
+- `message snapshot` 可以替换 transcript 内容，但必须保留仍有效的 activity / reasoning / tool refs，不得清空 owner 不属于 message 的 runtime facts。
+- `tool.result` 必须归到 owning assistant tool call；如果 provider 顺序非法，projection 应写 diagnostics，而不是把 tool result 当普通 assistant text。
+- partial tool args / JSON args buffer 只能在同一 `toolCallId` 下增量拼接；最终 args 应覆盖同 scope 的 partial buffer。
+- final text 与 streaming text 必须按 `messageId/partId` 去重、修正或替换，不能重复追加。
+
 ## Multimodal input
 
 用户输入可以包含文本、图片、音频、视频、文档和业务引用，但进入 RuntimeEvent 时必须拆清楚：

@@ -24,10 +24,10 @@ SDK 不拥有 Provider key，不绕过 App Server，不把产品应用里的本�
 
 | 包 | 分类 | 目标 |
 | --- | --- | --- |
-| `@limecloud/agent-ui-contracts` | `current` | Runtime event、read model、projection state、message parts、timeline、graph、TeamWorkbench、fixtures、validation。 |
+| `@limecloud/agent-ui-contracts` | `current` | Runtime event、read model、projection state、message parts、timeline、graph、subagents、fixtures、validation。 |
 | `@limecloud/agent-runtime-client` | `current` | App Server JSON-RPC client facade、session gateway adapter、event subscription、action response、evidence export。 |
-| `@limecloud/agent-runtime-projection` | `current` | 把 RuntimeEvent / App Server facts 投影为 `UIMessageParts`、`ProcessTimeline`、`ExecutionGraph`、`ActionRequired`、`ArtifactRef`、`EvidenceRef`、`TeamWorkbench`。 |
-| `@limecloud/agent-runtime-ui` | `current` | React projection view、message parts、process timeline、execution graph、action required、team workbench、runtime facts surfaces。 |
+| `@limecloud/agent-runtime-projection` | `current` | 把 RuntimeEvent / App Server facts 投影为 `UIMessageParts`、`ProcessTimeline`、`ExecutionGraph`、`ActionRequired`、`ArtifactRef`、`EvidenceRef`、`AgentUiProjectionState.subagents`。 |
+| `@limecloud/agent-runtime-ui` | `current` | React projection view、message parts、process timeline、execution graph、action required、SubagentsView、runtime facts surfaces。 |
 
 这四个包是当前物理实现和文档事实源。后续如果需要提供 `@limecloud/agent-ui` facade，只允许 re-export UI 侧能力，不导出 runtime transport。
 
@@ -38,7 +38,7 @@ SDK 不拥有 Provider key，不绕过 App Server，不把产品应用里的本�
 | [`@limecloud/agent-ui-contracts`](/sdk/typescript/contracts/overview) | 类型、事件、fixture、validation 的 SDK reference。 |
 | [`@limecloud/agent-runtime-client`](/sdk/typescript/runtime-client/overview) | Runtime client、session gateway、事件订阅、错误模型。 |
 | [`@limecloud/agent-runtime-projection`](/sdk/typescript/projection/overview) | Projector、App Server facts adapter、selectors、fixture replay。 |
-| [`@limecloud/agent-runtime-ui`](/sdk/typescript/runtime-ui/overview) | React surfaces、projection view、消息、过程、图、审批、团队工作台。 |
+| [`@limecloud/agent-runtime-ui`](/sdk/typescript/runtime-ui/overview) | React surfaces、projection view、消息、过程、图、审批、SubagentsView。 |
 | [Runtime Schemas](/sdk/schemas/runtime-event) | JSON schema / 跨语言序列化锚点。 |
 | [Conformance](/sdk/typescript/conformance) | 包级验收和 fixture replay 规范。 |
 
@@ -60,7 +60,7 @@ SDK 不拥有 Provider key，不绕过 App Server，不把产品应用里的本�
 | Contracts | TypeScript types、fixtures、validation helpers。 | schema validation、scope id、secret redaction、大 payload ref。 |
 | Runtime client | `createAgentRuntimeClient`、`createAgentRuntimeClientFromSessionGateway`、event subscription。 | transport error、mock-free production、action response、evidence export。 |
 | Projection | `createAgentUiProjector`、`projectAgentUiState`、`replayAgentUiFixture`、`replayAppServerFacts`。 | replay 幂等、sequence repair、final reconciliation、App Server facts normalization。 |
-| Runtime UI | `AgentUiProjectionView`、`UIMessagePartsView`、`ProcessTimelineView`、`ExecutionGraphView`、`ActionRequiredList`、`TeamWorkbenchView`。 | 渲染、交互接线、长文案布局、无 runtime 写入。 |
+| Runtime UI | `AgentUiProjectionView`、`UIMessagePartsView`、`ProcessTimelineView`、`ExecutionGraphView`、`ActionRequiredList`、`SubagentsView`。 | 渲染、交互接线、长文案布局、无 runtime 写入；旧 `TeamWorkbenchView` 仅作为历史命名出现在迁移说明。 |
 
 ## 最小落地顺序
 

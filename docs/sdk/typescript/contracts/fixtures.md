@@ -27,13 +27,14 @@ export interface AgentUiFixture<TEvent = AgentRuntimeExecutionEvent> {
     pendingActionCount?: number;
     artifactCount?: number;
     evidenceCount?: number;
-    teamWorkbench?: {
-      hasTeamSurface?: boolean;
-      rosterNodeCount?: number;
-      workItemCount?: number;
-      handoffEventCount?: number;
-      reviewEventCount?: number;
-      laneEventCount?: number;
+    subagents?: {
+      hasSubagents?: boolean;
+      threadCount?: number;
+      delegationCallCount?: number;
+      activityCount?: number;
+      activeThreadCount?: number;
+      completedThreadCount?: number;
+      failedThreadCount?: number;
     };
     diagnostics?: string[];
   };
@@ -46,7 +47,7 @@ export interface AgentUiFixture<TEvent = AgentRuntimeExecutionEvent> {
 | `initialReadModel` | 进入页面或 hydrate 前可选快照。 |
 | `finalReadModel` | runtime 结束后的 read model。 |
 | `expected` | projection / UI conformance 的最低断言。 |
-| `expected.teamWorkbench` | team roster、work board、handoff / review lane 的最低断言；没有 team facts 时也可显式断言 `hasTeamSurface: false`。 |
+| `expected.subagents` | subagent threads、delegation calls、activities 和线程状态集合的最低断言；没有 subagent facts 时也可显式断言 `hasSubagents: false`。 |
 
 ## Built-in Fixtures
 
@@ -55,23 +56,23 @@ export interface AgentUiFixture<TEvent = AgentRuntimeExecutionEvent> {
 | `text-basic` | turn lifecycle、model delta、final text、snapshot。 | message part 合并、runtime completed。 |
 | `tool-success` | tool started/result、output ref。 | Tool timeline、refs 不内联。 |
 | `tool-failure` | tool failed、failure category。 | Diagnostics、failed status。 |
-| `hitl-action` | `action.required` -> `action.resolved`。 | pending action 清零，UI 不乐观完成。 |
+| `hitl-action` | `action.required` -> `action.resolved` terminal 示例。 | pending action 清零，UI 不乐观完成。 |
 | `artifact-evidence` | artifact ref、evidence ref。 | Artifact / Evidence lane。 |
 | `stream-repair` | sequence gap、snapshot repair。 | repair diagnostics 可声明。 |
-| `subagent-handoff` | parent task、subagent、handoff、review verdict。 | ExecutionGraph、Evidence refs、`teamWorkbench` counts。 |
+| `subagent-handoff` | parent task、subagent、handoff、review verdict。 | ExecutionGraph、Evidence refs、`subagents` counts。 |
 
-## Team Workbench Assertions
+## Subagents Assertions
 
-`subagent-handoff` fixture 是 Team Workbench 的最低验收样本。它必须让 projection 生成：
+`subagent-handoff` fixture 是 Subagents surface 的最低验收样本。它必须让 projection 生成：
 
 | Projection field | Required assertion |
 | --- | --- |
-| `state.teamWorkbench.hasTeamSurface` | 有 subagent、worker、handoff 或 review facts 时为 `true`。 |
-| `state.teamWorkbench.rosterNodes` | 至少包含一个 subagent / worker graph node。 |
-| `state.teamWorkbench.workItems` | 至少包含 parent task 或 work item node。 |
-| `state.teamWorkbench.handoffEvents` | 包含 handoff request / completion facts。 |
-| `state.teamWorkbench.reviewEvents` | 包含 review request / verdict facts，或通过 `evidenceRefs` 关联。 |
-| `state.teamWorkbench.laneEvents` | 合并 handoff 与 review lane，顺序稳定。 |
+| `state.subagents.hasSubagents` | 有 subagent、worker、handoff 或 review facts 时为 `true`。 |
+| `state.subagents.threads` | 至少包含一个 subagent / worker thread。 |
+| `state.subagents.delegationCalls` | 包含 spawn / handoff 调用事实。 |
+| `state.subagents.activities` | 保留 started / interacted / handoff / review / completed 活动轨迹。 |
+| `state.subagents.completedThreadIds` | completed 子代理线程 id。 |
+| `state.subagents.failedThreadIds` | failed 子代理线程 id。 |
 
 Fixture 只能保存 normalized runtime facts。大 artifact、evidence pack、原始工具输出必须通过 refs 表达。
 

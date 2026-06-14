@@ -98,7 +98,7 @@ export interface AgentUiProjectionState<TEvent = AgentRuntimeExecutionEvent> {
   artifacts: AgentUiArtifactRefView[];
   evidence: AgentUiEvidenceRefView[];
   diagnostics: AgentUiDiagnosticView[];
-  teamWorkbench: AgentUiTeamWorkbenchModel<TEvent>;
+  subagents: AgentUiSubagentsModel<TEvent>;
   readModel: AgentRuntimeReadModel<TEvent>;
   hydration: {
     status: AgentUiHydrationStatus;
@@ -108,16 +108,17 @@ export interface AgentUiProjectionState<TEvent = AgentRuntimeExecutionEvent> {
 }
 ```
 
-`teamWorkbench` 是 subagent / worker / task / handoff / review 的标准聚合模型。它是必填字段；solo run 使用 `hasTeamSurface: false` 和空数组表达。React surface 只能消费这个模型，不能在组件内重新过滤 `graph` 或 `readModel.visibleEvents` 来解释团队事实。
+`subagents` 是 subagent / worker / task / handoff / review 的标准聚合模型。它是必填字段；solo run 使用 `hasSubagents: false` 和空数组表达。React surface 只能消费这个模型，不能在组件内重新过滤 `graph` 或 `readModel.visibleEvents` 来解释团队事实。旧 `teamWorkbench` 命名只作为历史 seed / compat surface，不是 current owner。
 
 ```ts
-export interface AgentUiTeamWorkbenchModel<TEvent = AgentRuntimeExecutionEvent> {
-  hasTeamSurface: boolean;
-  rosterNodes: ExecutionGraph;
-  workItems: ExecutionGraph;
-  handoffEvents: AgentRuntimeEventProjection<TEvent>[];
-  reviewEvents: AgentRuntimeEventProjection<TEvent>[];
-  laneEvents: AgentRuntimeEventProjection<TEvent>[];
+export interface AgentUiSubagentsModel {
+  hasSubagents: boolean;
+  threads: AgentUiSubagentThreadView[];
+  delegationCalls: AgentUiSubagentDelegationView[];
+  activities: AgentUiSubagentActivityView[];
+  activeThreadIds: string[];
+  completedThreadIds: string[];
+  failedThreadIds: string[];
 }
 ```
 
@@ -128,7 +129,48 @@ export interface AgentUiTeamWorkbenchModel<TEvent = AgentRuntimeExecutionEvent> 
 | `UIMessagePart` | text、reasoning、tool preview、artifact card、evidence citation、diagnostic ref。 |
 | `ProcessTimelineEntry` | 用户可见过程时间线，按 event sequence 呈现。 |
 | `ExecutionGraphNode` | turn、run、task、subagent、tool、action 等结构化节点。 |
-| `AgentUiTeamWorkbenchModel` | roster、work board、handoff / review lane 的标准团队工作台模型。 |
+| `AgentUiSubagentsModel` | threads、delegation calls、activities 的标准 subagents 模型。 |
+
+## Runtime Capability / Resume
+
+v2.10 新增两个可执行合同类型。它们不是新的 runtime owner，而是把已有 App Server `capability/list` 与 `agentSession/thread/resume` 的边界固定成可校验结构。
+
+```ts
+export interface AgentRuntimeCapabilityManifest {
+  schemaVersion: "lime-runtime-capability-manifest/v0.1" | string;
+  runtimeId: string;
+  providerId?: string;
+  sessionId?: string;
+  generatedAt: string;
+  capabilities: AgentRuntimeCapabilityEntry[];
+}
+
+export interface AgentRuntimeCapabilityEntry {
+  id: AgentRuntimeCapabilityId;
+  status: AgentRuntimeCapabilityStatus;
+  scope: AgentRuntimeCapabilityScope;
+  title: string;
+  detail?: string;
+  version?: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+```ts
+export interface AgentRuntimeResumeContract {
+  schemaVersion: "lime-runtime-resume-contract/v0.1" | string;
+  runtimeId: string;
+  sessionId: string;
+  turnId: string;
+  resumeMode: "all-open-actions" | "selected-actions" | "cancel-open-actions" | string;
+  openActionIds: string[];
+  decisions: AgentRuntimeResumeActionDecision[];
+  expiresAt?: string;
+  createdAt: string;
+}
+```
+
+`resumeMode=all-open-actions` 或 `selected-actions` 时，`decisions[].actionId` 必须覆盖 `openActionIds`。Lime RuntimeCore 在 resume queued turn 前执行同一规则；UI 不能本地跳过 open action。
 
 ## 使用示例
 

@@ -35,7 +35,7 @@ React 层只做三件事：
 | Action required | `ActionRequiredList` | `state.actions` | `onResolveAction`。 |
 | Artifact refs | `ArtifactRefList` | `state.artifacts` | `onSelectArtifactRef`。 |
 | Evidence refs | `EvidenceRefList` | `state.evidence` | `onSelectEvidenceRef`。 |
-| Team Workbench | `TeamWorkbenchView` | `state.teamWorkbench` | focus teammate / handoff 由宿主组合。 |
+| Subagents | `SubagentsView` | `state.subagents` | open thread / handoff 由宿主组合。 |
 | Diagnostics | runtime fact cards | `state.diagnostics` / failed facts | open repair 由宿主组合。 |
 
 ## Provider boundary
@@ -61,7 +61,7 @@ ActionRequired 必须是受控交互：
 />
 ```
 
-点击 approve / reject 后，组件可以显示宿主自己的 pending UI，但不能把 action 标成 resolved。只有 runtime 返回 `action.resolved` 或 read model repair 后，ProjectionState 才能更新完成态。
+点击 approve / reject 后，组件可以显示宿主自己的 pending UI，但不能把 action 标成 resolved。只有 runtime 返回 action terminal 或 read model repair 后，ProjectionState 才能更新完成态。
 
 ## 测试要求
 

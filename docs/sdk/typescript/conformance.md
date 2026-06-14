@@ -34,13 +34,14 @@ export interface AgentUiFixture {
     pendingActionCount?: number;
     artifactCount?: number;
     evidenceCount?: number;
-    teamWorkbench?: {
-      hasTeamSurface?: boolean;
-      rosterNodeCount?: number;
-      workItemCount?: number;
-      handoffEventCount?: number;
-      reviewEventCount?: number;
-      laneEventCount?: number;
+    subagents?: {
+      hasSubagents?: boolean;
+      threadCount?: number;
+      delegationCallCount?: number;
+      activityCount?: number;
+      activeThreadCount?: number;
+      completedThreadCount?: number;
+      failedThreadCount?: number;
     };
     diagnostics?: string[];
   };
@@ -56,7 +57,7 @@ Fixture 只保存 normalized facts。原生 Provider payload 必须放在 `refs.
 | `text-basic` | lifecycle、stream delta、final reconciliation、snapshot completed。 |
 | `tool-success` | tool args、progress、result、output ref、timeline。 |
 | `tool-failure` | failure category、diagnostic、recovery action。 |
-| `hitl-action` | `action.required`、waiting read model、`action.resolved`。 |
+| `hitl-action` | `action.required`、waiting read model、action terminal。 |
 | `artifact-evidence` | artifact ref、evidence ref、review/replay correlation。 |
 | `stream-repair` | sequence gap、stale、read model repair、text 不重复。 |
 | `subagent-handoff` | parent task、child subagent、channel、handoff、review verdict。 |
@@ -130,7 +131,7 @@ Projection replay 必须覆盖标准 surface 字段：
 | `actions` | `ActionRequired` 只来自 unresolved action facts。 |
 | `artifacts` | `ArtifactRef` 只保存 refs 和轻量摘要。 |
 | `evidence` | `EvidenceRef` 保留 review / replay correlation。 |
-| `teamWorkbench` | `TeamWorkbench` 必填；solo run 输出空模型，多执行体 fixture 输出 roster/work/lane counts。 |
+| `subagents` | `AgentUiSubagentsModel` 必填；solo run 输出空模型，多执行体 fixture 输出 threads/delegation/activity counts。 |
 
 ## React conformance
 
@@ -143,7 +144,7 @@ React surfaces 用 fixture projection state 渲染，不自己跑 runtime。
 | ExecutionGraph | task/subagent parent-child edge 可见。 |
 | ActionRequired | 点击只调用 callback，不本地标记 resolved。 |
 | Artifact / Evidence lane | 只展示 refs，不复制大 payload。 |
-| TeamWorkbench | 只读取 `state.teamWorkbench`，不在组件内重建 roster、work board 或 handoff lane。 |
+| SubagentsView | 只读取 `state.subagents`，不在组件内重建 threads、delegation calls 或 activity truth。 |
 | Diagnostics | unknown/unavailable/stale/blocked 可见。 |
 
 ## Definition of Done

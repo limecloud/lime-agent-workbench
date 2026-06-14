@@ -41,6 +41,10 @@ export {
 | 导出 evidence | `exportEvidence(params, options)` |
 | 订阅 events | `subscribeEvents(listener)`、`nextEvent(timeoutMs)` |
 
+## Runtime Pipeline
+
+v2.4 的 runtime client 协议演进层按 `normalize -> adapter -> middleware -> sequence verifier -> dispatch` 收口。详见 [Runtime Middleware / Adapter](/sdk/typescript/runtime-client/middleware-adapter)。
+
 ## Boundary
 
 | 允许 | 禁止 |
@@ -75,4 +79,3 @@ npm --prefix packages/agent-runtime-client run test
 ```bash
 npm run test:contracts
 ```
-

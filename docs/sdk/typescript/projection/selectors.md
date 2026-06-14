@@ -19,7 +19,7 @@ description: ProjectionState 的读取约定与 selector 边界。
 | Action required | `state.actions` | 需要用户处理的 action。 |
 | Artifact refs | `state.artifacts` | artifact lane。 |
 | Evidence refs | `state.evidence` | evidence / review / replay lane。 |
-| Team workbench | `state.teamWorkbench` | roster、work board、handoff / review lane。 |
+| Subagents | `state.subagents` | threads、delegation calls、activities 和线程状态集合。 |
 | Diagnostics | `state.diagnostics` | failed、blocked、runtime error。 |
 
 ## Usage
@@ -51,7 +51,7 @@ export function selectMessageParts(state: AgentUiProjectionState): UIMessagePart
 export function selectProcessTimeline(state: AgentUiProjectionState): ProcessTimeline;
 export function selectExecutionGraph(state: AgentUiProjectionState): ExecutionGraph;
 export function selectActionRequired(state: AgentUiProjectionState): AgentRuntimeEventProjection[];
-export function selectTeamWorkbench(state: AgentUiProjectionState): AgentUiTeamWorkbenchModel;
+export function selectSubagents(state: AgentUiProjectionState): AgentUiSubagentsModel;
 ```
 
 这属于 API polish，不改变 current owner。

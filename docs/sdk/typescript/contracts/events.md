@@ -38,6 +38,9 @@ export type AgentRuntimeEventClass =
   | "artifact.changed"
   | "action.required"
   | "action.resolved"
+  | "action.cancelled"
+  | "action.canceled"
+  | "action.expired"
   | "runtime.error"
   | "evidence.changed"
   | "snapshot.updated"
@@ -46,12 +49,12 @@ export type AgentRuntimeEventClass =
 
 | Family | Events | Projection |
 | --- | --- | --- |
-| Session / turn | `session.created`、`turn.submitted`、`turn.started`、`turn.completed`、`turn.failed` | `runtime.status`、timeline、read model hydration。 |
+| Session / turn | `session.created`、`turn.submitted`、`turn.started`、`turn.completed`、`turn.failed`、`turn.canceled` | `runtime.status`、timeline、read model hydration。 |
 | Model output | `model.requested`、`model.delta`、`model.completed`、`model.failed` | `UIMessageParts` text / reasoning、runtime status。 |
 | Tool | `tool.started`、`tool.result`、`tool.failed`、`tool.catalog.resolved` | ToolGroup、ProcessTimeline、ExecutionGraph。 |
 | Permission / sandbox | `permission.*`、`sandbox.*` | ActionRequired、Diagnostics、runtime blocked state。 |
 | Artifact / evidence | `artifact.changed`、`evidence.changed` | Artifact lane、Evidence lane、message cards。 |
-| Human action | `action.required`、`action.resolved` | `ActionRequiredList`、waiting / completed reconciliation。 |
+| Human action | `action.required`、`action.resolved`、`action.cancelled`、`action.canceled`、`action.expired` | `ActionRequiredList`、waiting / completed reconciliation。 |
 | Snapshot / repair | `snapshot.updated` | hydration repair、stale recovery、final reconciliation。 |
 
 Subagent / team events such as `task.created`、`subagent.started`、`handoff.requested`、`review.verdict` are supported through the open string extension and standard scope ids. They must still carry `taskId`、`subagentId`、`handoffId`、`reviewId` or evidence refs where applicable.
@@ -198,6 +201,8 @@ turn 失败。失败原因进入 `payload.failureCategory` 或 diagnostics ref�
 
 Tool events 必须携带 `toolCallId`，否则 validation 返回 `missing_scope_id`。
 
+Tool events 还必须保留可追踪 owner。`tool.started` 是同一 `toolCallId` 的 owner 起点；后续 `tool.args`、`tool.result`、`tool.failed` 如果显式带 `messageId`、`itemId` 或 `assistantMessageId`，必须与 started 事件一致。Workbench 标准不接受 UI 在投影阶段把 tool terminal 重新归到另一个 assistant item。
+
 ### tool.started
 
 ```ts
@@ -228,11 +233,19 @@ Tool events 必须携带 `toolCallId`，否则 validation 返回 `missing_scope_
 
 工具失败。UI 展示为 diagnostics 和 tool preview failure。
 
+provider core / RuntimeBackend 看到底层工具结果 `success=false` 时必须输出 `tool.failed`。这不是 UI projection 的降级解释；失败工具不能先进入 `tool.result` 再靠 `payload.error` 或 assistant 正文推断。
+
 | Property | Required | Description |
 | --- | --- | --- |
 | `toolCallId` | yes | 工具调用 scope。 |
 | `payload.failureCategory` | recommended | 稳定失败分类，例如 `permission_denied`。 |
+| `payload.error` | recommended | 面向 diagnostics 的错误摘要。 |
+| `payload.output` | optional | 工具产生的失败输出摘要；大输出仍走 refs。 |
 | `status` | yes | `failed`。 |
+
+## RuntimeCore append semantics
+
+App Server / RuntimeCore 接收外部 runtime events 时必须 batch atomic：先验证整批 schema、sequence、tool lifecycle、approval gate 和 owner adjacency，再写入 session events。任一事件失败时，整批不写入，projection 和 read model 只能看到失败诊断，不能看到半个 batch 的副作用。
 
 ## Human Action Events
 
@@ -253,7 +266,7 @@ Action events 必须携带 `actionId`。
 }
 ```
 
-UI 可以显示 pending 状态，但不能本地把 action 标记为完成。完成态必须来自 `action.resolved` 或 read model repair。
+UI 可以显示 pending 状态，但不能本地把 action 标记为完成。完成态必须来自 action terminal 或 read model repair。
 
 ### action.resolved
 
@@ -262,6 +275,18 @@ UI 可以显示 pending 状态，但不能本地把 action 标记为完成。完
 | `actionId` | yes | 被处理的 action。 |
 | `payload.decision` | recommended | `approved`、`rejected`、`answered` 等稳定决策。 |
 | `status` | yes | `completed`。 |
+
+### action.cancelled / action.canceled / action.expired
+
+这些事件是 action terminal，语义是等待点已被取消、撤回或过期。它们与 `action.resolved` 使用同一 `actionId` 配对规则，会让 read model 清理 pending action。
+
+| Property | Required | Description |
+| --- | --- | --- |
+| `actionId` | yes | 被收口的 action。 |
+| `payload.reason` | recommended | `user_cancelled`、`timeout`、`superseded` 等稳定原因。 |
+| `status` | yes | `completed`。 |
+
+孤立的 action terminal 不是 no-op，必须由 Sequence Verifier fail closed。
 
 ## Artifact / Evidence Events
 
@@ -288,17 +313,17 @@ Artifact 与 Evidence events 必须携带稳定 id 或 refs。
 | `evidence.changed` | `evidenceId` or `evidenceRefs` | Evidence citation / review lane。 |
 | `review.verdict` | `reviewId` plus evidence ref | Evidence / Review surface。 |
 
-## Team Workbench Events
+## Subagents Events
 
-Team Workbench 事件仍使用同一个 `AgentRuntimeExecutionEvent` envelope。事件族可以通过 `eventClass: string` 扩展，但进入 contracts 后必须保留稳定 scope，projection 才能生成 `state.teamWorkbench`。
+Subagents 事件仍使用同一个 `AgentRuntimeExecutionEvent` envelope。事件族可以通过 `eventClass: string` 扩展，但进入 contracts 后必须保留稳定 scope，projection 才能生成 `state.subagents`。
 
 | Event class | Required scope | Projection result |
 | --- | --- | --- |
-| `task.created` / `task.updated` | `taskId`，推荐 `parentTaskId` 或 `runId` 放在 `payload`。 | `teamWorkbench.workItems` 与 `ExecutionGraph` task node。 |
-| `subagent.started` / `subagent.completed` | `subagentId` + `taskId`。 | `teamWorkbench.rosterNodes` 与 parent-child graph edge。 |
-| `worker.started` / `worker.completed` | `subagentId` 或稳定 worker id，推荐关联 `taskId`。 | roster member；缺 lineage 时降级为 `unavailable` diagnostic。 |
-| `handoff.requested` / `handoff.completed` | `payload.handoffId`，推荐 `taskId` / `subagentId`。 | `teamWorkbench.handoffEvents` 和 `laneEvents`。 |
-| `review.requested` / `review.verdict` | `payload.reviewId` 或 `evidenceRefs`。 | `teamWorkbench.reviewEvents`、`laneEvents` 与 Evidence lane。 |
+| `task.created` / `task.updated` | `taskId`，推荐 `parentTaskId` 或 `runId` 放在 `payload`。 | `ExecutionGraph` task node 与 `state.subagents.activities`。 |
+| `subagent.started` / `subagent.completed` | `subagentId` + `taskId`。 | `state.subagents.threads` 与 parent-child graph edge。 |
+| `worker.started` / `worker.completed` | `subagentId` 或稳定 worker id，推荐关联 `taskId`。 | thread activity；缺 lineage 时降级为 `unavailable` diagnostic。 |
+| `handoff.requested` / `handoff.completed` | `handoffId`，推荐 `taskId` / `subagentId`。 | `state.subagents.delegationCalls` 与 `activities`。 |
+| `review.requested` / `review.verdict` | `reviewId` 或 `evidenceRefs`。 | `state.subagents.activities` 与 Evidence lane。 |
 
 这些事件不能只作为普通 message text 输出。缺少 lineage 时，runtime provider 应输出 `unknown`、`unavailable`、`stale` 或 diagnostic event；projection 不从标题、正文或组件状态猜父子关系。
 

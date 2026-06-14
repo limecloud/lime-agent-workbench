@@ -1,91 +1,99 @@
 ---
 title: Team Workbench
-description: TeamWorkbenchView 的多执行体 React surface 合同。
+description: TeamWorkbench 历史命名的退场说明和 SubagentsView 迁移边界。
 ---
 
-# Team Workbench
+# Team Workbench Historical Name
 
-`TeamWorkbenchView` 是 Lime AgentUI 对 subagent、worker、task、handoff 和 review 的标准 React surface。它只消费 `AgentUiProjectionState`，并从 `state.teamWorkbench` 读取已经由 projection 层构建好的标准模型；React 组件不订阅 runtime stream，也不重新解释 runtime truth。
+`TeamWorkbenchView` 是早期多执行体 React seed 的历史命名。current owner 已经收敛到 [`AgentUiProjectionState.subagents`](/subagents) 和 `SubagentsView`：React 组件只消费 projection state，不订阅 runtime stream，也不重新解释 runtime truth。
 
-实现锚点：`packages/agent-runtime-ui/src/teamWorkbench.tsx`。
+实现锚点：`packages/agent-runtime-ui/src/subagents.tsx`。
+
+主仓 current `@limecloud/agent-runtime-ui` 不导出 `TeamWorkbenchView`、`TeamRosterView`、`WorkBoardView` 或 `HandoffLaneView`。新文档、新产品接入和新 fixture 断言必须使用 `SubagentsView` / `state.subagents`。
 
 ## 导出
 
 ```ts
 export {
-  TeamWorkbenchView,
-  TeamRosterView,
-  WorkBoardView,
-  HandoffLaneView
+  SubagentsView,
+  SubagentThreadList,
+  SubagentDelegationList,
+  SubagentActivityList
 } from "@limecloud/agent-runtime-ui";
 ```
 
-## TeamWorkbenchView
+## SubagentsView
 
 ```ts
-export interface TeamWorkbenchViewProps<TEvent = AgentRuntimeExecutionEvent> {
-  state: AgentUiProjectionState<TEvent>;
-  emptyRoster?: ReactNode;
-  emptyWorkBoard?: ReactNode;
-  emptyHandoffLane?: ReactNode;
+export interface SubagentsViewProps<TEvent = AgentRuntimeExecutionEvent> {
+  state?: AgentUiProjectionState<TEvent>;
+  model?: AgentUiProjectionState<TEvent>["subagents"];
+  emptyThreads?: ReactNode;
+  emptyDelegations?: ReactNode;
+  emptyActivities?: ReactNode;
   labels?: {
-    teamWorkbenchAriaLabel?: string;
-    teamRosterAriaLabel?: string;
-    workBoardAriaLabel?: string;
-    handoffLaneAriaLabel?: string;
-    teamNodeTitle?: (node: ExecutionGraphNode) => ReactNode;
-    teamNodeMeta?: (node: ExecutionGraphNode) => ReactNode;
-    workItemTitle?: (node: ExecutionGraphNode) => ReactNode;
-    workItemMeta?: (node: ExecutionGraphNode) => ReactNode;
-    eventStatusLabel?: (event: AgentRuntimeEventProjection<TEvent>) => ReactNode;
+    subagentsAriaLabel?: string;
+    subagentThreadsAriaLabel?: string;
+    subagentDelegationsAriaLabel?: string;
+    subagentActivitiesAriaLabel?: string;
+    subagentThreadTitle?: (thread: AgentUiSubagentThreadView) => ReactNode;
+    subagentThreadMeta?: (thread: AgentUiSubagentThreadView) => ReactNode;
+    subagentThreadSummary?: (thread: AgentUiSubagentThreadView) => ReactNode;
+    subagentDelegationTitle?: (delegation: AgentUiSubagentDelegationView) => ReactNode;
+    subagentActivityTitle?: (activity: AgentUiSubagentActivityView) => ReactNode;
+    subagentActivityMeta?: (activity: AgentUiSubagentActivityView) => ReactNode;
   };
+  onOpenThread?: (thread: AgentUiSubagentThreadView) => void;
 }
 ```
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `state` | `AgentUiProjectionState` | 唯一事实输入。 |
-| `emptyRoster` | `ReactNode` | team roster 空态。 |
-| `emptyWorkBoard` | `ReactNode` | work board 空态。 |
-| `emptyHandoffLane` | `ReactNode` | handoff lane 空态。 |
+| `state` | `AgentUiProjectionState` | 组合视图可直接传完整 projection state。 |
+| `model` | `AgentUiProjectionState["subagents"]` | 独立 surface 可直接传已投影模型。 |
+| `emptyThreads` | `ReactNode` | subagent threads 空态。 |
+| `emptyDelegations` | `ReactNode` | delegation calls 空态。 |
+| `emptyActivities` | `ReactNode` | activities 空态。 |
 | `labels` | callbacks | aria、标题、meta、状态文案注入。 |
+| `onOpenThread` | callback | 宿主处理打开子代理线程。 |
 
 ## 子 surface
 
 | Surface | Input | 来源 |
 | --- | --- | --- |
-| `TeamRosterView` | `ExecutionGraphNode[]` | `state.teamWorkbench.rosterNodes`。 |
-| `WorkBoardView` | `ExecutionGraphNode[]` | `state.teamWorkbench.workItems`。 |
-| `HandoffLaneView` | `AgentRuntimeEventProjection[]` | `state.teamWorkbench.laneEvents`。 |
+| `SubagentThreadList` | `AgentUiSubagentThreadView[]` | `state.subagents.threads`。 |
+| `SubagentDelegationList` | `AgentUiSubagentDelegationView[]` | `state.subagents.delegationCalls`。 |
+| `SubagentActivityList` | `AgentUiSubagentActivityView[]` | `state.subagents.activities`。 |
 
-`TeamWorkbenchView` 在没有 team / work item / handoff facts 时返回 `null`。这表示 solo run，不表示错误。即使返回 `null`，`state.teamWorkbench` 仍然必须存在，且包含空数组。
+`SubagentsView` 在没有 subagent / work item / handoff facts 时返回 `null`。这表示 solo run，不表示错误。即使返回 `null`，`state.subagents` 仍然必须存在，且包含空数组。
 
 ## State Contract
 
 React surface 不从 `state.graph` 或 `state.readModel.visibleEvents` 重新构造团队模型；这些聚合必须由 projection 层提前完成。
 
 ```ts
-type TeamWorkbenchInput<TEvent = AgentRuntimeExecutionEvent> =
-  AgentUiProjectionState<TEvent>["teamWorkbench"];
+type SubagentsInput<TEvent = AgentRuntimeExecutionEvent> =
+  AgentUiProjectionState<TEvent>["subagents"];
 ```
 
 | Required field | Consumed by |
 | --- | --- |
-| `hasTeamSurface` | `TeamWorkbenchView` 判断是否渲染。 |
-| `rosterNodes` | `TeamRosterView`。 |
-| `workItems` | `WorkBoardView`。 |
-| `handoffEvents` | lane 分组和 handoff count。 |
-| `reviewEvents` | review lane 与 Evidence lane correlation。 |
-| `laneEvents` | `HandoffLaneView` 主输入。 |
+| `hasSubagents` | `SubagentsView` 判断是否渲染。 |
+| `threads` | 子代理线程列表。 |
+| `delegationCalls` | spawn / handoff / send input / wait / interrupt / close 调用记录。 |
+| `activities` | started / interacted / handoff / review / completed 活动轨迹。 |
+| `activeThreadIds` | 活跃线程集合。 |
+| `completedThreadIds` | 已完成线程集合。 |
+| `failedThreadIds` | 失败线程集合。 |
 
 ## DOM Contract
 
 ```tsx
 <section
-  className="agent-team-workbench"
-  data-team-count={state.teamWorkbench.rosterNodes.length}
-  data-work-item-count={state.teamWorkbench.workItems.length}
-  data-handoff-count={state.teamWorkbench.laneEvents.length}
+  className="agent-subagents"
+  data-subagent-count={state.subagents.threads.length}
+  data-delegation-count={state.subagents.delegationCalls.length}
+  data-activity-count={state.subagents.activities.length}
 />
 ```
 
@@ -93,49 +101,50 @@ type TeamWorkbenchInput<TEvent = AgentRuntimeExecutionEvent> =
 
 | Attribute | Surface | Description |
 | --- | --- | --- |
-| `data-node-id` | roster / work board | graph node id。 |
-| `data-node-type` | roster / work board | `subagent`、`task`、`job` 等。 |
-| `data-node-status` | roster / work board | runtime status。 |
-| `data-parent-id` | roster / work board | parent graph edge。 |
-| `data-event-class` | handoff lane | `handoff.*` / `review.*`。 |
+| `data-thread-id` | threads | subagent thread id。 |
+| `data-subagent-id` | threads | subagent id。 |
+| `data-subagent-status` | threads | runtime status。 |
+| `data-delegation-action` | delegation calls | `spawn`、`handoff`、`send_input` 等。 |
+| `data-activity-kind` | activities | `started`、`interacted`、`handoff`、`review`、`completed`。 |
 
 ## Example
 
 ```tsx
-import { TeamWorkbenchView } from "@limecloud/agent-runtime-ui";
+import { SubagentsView } from "@limecloud/agent-runtime-ui";
 
-<TeamWorkbenchView
-  state={state}
+<SubagentsView
+  model={state.subagents}
   labels={{
-    teamWorkbenchAriaLabel: "团队工作台",
-    teamRosterAriaLabel: "团队成员",
-    workBoardAriaLabel: "工作板",
-    handoffLaneAriaLabel: "移交记录"
+    subagentsAriaLabel: "子代理",
+    subagentThreadsAriaLabel: "子代理线程",
+    subagentDelegationsAriaLabel: "委派记录",
+    subagentActivitiesAriaLabel: "活动记录"
   }}
 />;
 ```
 
 ## Runtime Contract
 
-Team Workbench 依赖 runtime facts，而不是 UI 本地状态。
+Subagents surface 依赖 runtime facts，而不是 UI 本地状态。
 
 | Runtime fact | Required id | UI result |
 | --- | --- | --- |
 | `task.created` / `task.updated` | `taskId` | Work board item。 |
-| `subagent.started` / `subagent.completed` | `subagentId` + `taskId` | Team roster member + graph edge。 |
+| `subagent.started` / `subagent.completed` | `subagentId` + `taskId` | Subagent thread + graph edge。 |
 | `handoff.requested` / `handoff.completed` | `handoffId` | Handoff lane entry。 |
 | `review.verdict` | `reviewId` + evidence ref | Review / evidence lane entry。 |
 
-projection 必须先把这些 facts 聚合到 `AgentUiTeamWorkbenchModel`：
+projection 必须先把这些 facts 聚合到 `AgentUiSubagentsModel`：
 
 ```ts
-interface AgentUiTeamWorkbenchModel {
-  hasTeamSurface: boolean;
-  rosterNodes: ExecutionGraph;
-  workItems: ExecutionGraph;
-  handoffEvents: AgentRuntimeEventProjection[];
-  reviewEvents: AgentRuntimeEventProjection[];
-  laneEvents: AgentRuntimeEventProjection[];
+interface AgentUiSubagentsModel {
+  hasSubagents: boolean;
+  threads: AgentUiSubagentThreadView[];
+  delegationCalls: AgentUiSubagentDelegationView[];
+  activities: AgentUiSubagentActivityView[];
+  activeThreadIds: string[];
+  completedThreadIds: string[];
+  failedThreadIds: string[];
 }
 ```
 
@@ -156,7 +165,7 @@ npm --prefix packages/agent-runtime-ui run test
 
 必须覆盖：
 
-1. `subagent-handoff` fixture 能渲染 team roster。
-2. Work board 能展示 parent task。
-3. Handoff lane 能展示 `handoff.requested` 与 `review.verdict`。
-4. `AgentUiProjectionView` 组合视图包含 Team Workbench。
+1. `subagent-handoff` fixture 能渲染 subagent thread。
+2. Delegation calls 能展示 spawn / handoff。
+3. Activities 能展示 handoff 与 completed。
+4. `AgentUiProjectionView` 组合视图包含 Subagents surface。

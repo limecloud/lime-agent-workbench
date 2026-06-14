@@ -34,7 +34,7 @@ Diagnostics
 | `ProcessTimeline` | `run.status`、`reasoning.*`、`tool.*`、`action.*`、`artifact.changed`、`evidence.changed`。 |
 | `ExecutionGraph` | `task.*`、`subagent.*`、`job.*`、`attempt.*`、dependency / handoff facts。 |
 | `ToolGroup` | `tool.started`、`tool.args`、`tool.progress`、`tool.result`、`tool.failed`。 |
-| `ActionRequired` | `action.required`、`permission.*`、`action.resolved`。 |
+| `ActionRequired` | `action.required`、`permission.*`、action terminal。 |
 | `TaskCapsule` | `task.*`、`queue.changed`、`subagent.*`、`job.*`。 |
 | `ArtifactRef` | `artifact.changed` 与 artifact service preview。 |
 | `EvidenceRef` | `evidence.changed` 与 evidence/replay/review summary。 |

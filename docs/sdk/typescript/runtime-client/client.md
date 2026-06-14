@@ -30,7 +30,7 @@ export interface AgentRuntimeClient {
 | `startTurn` | 提交用户输入或产品 action。 | 等待 `agentSession/event`，不要本地伪造 assistant 输出。 |
 | `readThread` | 读取当前 session/thread read model。 | hydrate projection。 |
 | `cancelTurn` | 请求停止当前 turn。 | 等 runtime event 或 read model 反映取消。 |
-| `respondAction` | 响应 `action.required`。 | 等 `action.resolved`。 |
+| `respondAction` | 响应 `action.required`。 | 等 action terminal。 |
 | `exportEvidence` | 导出 evidence pack。 | 显示 `EvidenceRef`，不复制大文件内容。 |
 | `subscribeEvents` | 注册 event listener。 | 将 event 传给 projection。 |
 | `nextEvent` | 测试或 bridge drain 场景读取下一条 event。 | 只用于有明确 event source 的场景。 |
@@ -65,4 +65,3 @@ subscription.unsubscribe();
 - 不在 client 内调用 `projectAgentUiState`。
 - 不读取产品应用本地 Provider key。
 - 不把 JSON-RPC raw response 当 React props 直接传组件。
-

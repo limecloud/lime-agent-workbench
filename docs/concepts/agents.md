@@ -12,8 +12,8 @@ description: Lime 中 agent、subagent、teammate 与 task 的边界。
 | 概念 | Runtime 事实 | UI 投影 |
 | --- | --- | --- |
 | 前台 Agent | `threadId`、`turnId`、`runId` | conversation、runtime status。 |
-| 子代理 | `subagentId`、parent links | team roster、delegation graph。 |
-| 后台任务 | `taskId`、`jobId` | task capsule、work board。 |
+| 子代理 | `subagentId`、parent links | SubagentsView、delegation graph。 |
+| 后台任务 | `taskId`、`jobId` | task capsule、projection activity。 |
 | 远程 Agent | `channelId`、peer ids | remote teammate。 |
 
 UI 不能把所有 worker 压平成一个匿名 assistant。只要 Runtime 暴露 agent/task identity，AgentUI 必须保留 ownership 和 lineage。

@@ -12,7 +12,7 @@ Lime 接受外部协议的启发，但不能把外部协议当成内部治理答
 | Agent ↔ User Interaction | AG-UI、assistant-ui | Lime AgentUI 投影 契约。 |
 | Agent ↔ Runtime facts | OpenAI Agents SDK、LangGraph runtime、AI SDK streams | Lime AgentRuntime 剖面、RuntimeEvent、ThreadReadModel、TaskSnapshot。 |
 | Agent ↔ Tools/Data | MCP、tool calling schemas | App Server capability gateway、Tool inventory、Policy/Permission/Sandbox facts。 |
-| Agent ↔ Agent | A2A、multi-agent runtimes | RuntimeCore task/subagent/job/channel facts 与 Team Workbench 投影。 |
+| Agent ↔ Agent | A2A、multi-agent runtimes | RuntimeCore task/subagent/job/channel facts 与 `AgentUiProjectionState.subagents` 投影。 |
 | Evidence/Replay/Review | tracing、eval、observability tools | Lime evidence/replay/review refs joined by runtime correlation ids。 |
 
 ## 采用原则
@@ -30,6 +30,18 @@ AG-UI 的价值在于把 agent/frontend 连接建模为事件流，并把 lifecy
 - RuntimeCore 是 durable truth，不是 UI client 本地 reducer。
 - Evidence、replay、review、benchmark 必须能通过 correlation ids join。
 - 旧 `messages`、`executionEvents` 只能作为兼容缓存，不是标准输出。
+
+v2 已吸收 AG-UI 的流式状态机、adapter / middleware pipeline、fan-out / flush substrate、fail-closed gate、capability manifest seed 和 resume contract seed。没有采用的是 AG-UI 事件名、Observable API、SSE / protobuf wire protocol 或前端 reducer 作为 durable truth。
+
+仍需继续吸收的深层机制：
+
+- apply reconciliation：message snapshot、tool result adjacency、partial tool args、encrypted reasoning continuity。
+- encoding negotiation：仅作为外部 gateway compatibility 候选，不能覆盖 Lime current JSON-RPC / Host bridge owner。
+
+已落地但不应夸大的边界：
+
+- capability manifest：已形成 `AgentRuntimeCapabilityManifest`、JSON Schema、validation API，并接入 Lime `capability/list`；自动 negotiation 未完成。
+- active run / interrupt / resume：已形成 `AgentRuntimeResumeContract` 和 open action coverage 校验，并接入 Lime `agentSession/thread/resume`；跨 provider 自动 resume negotiation 未完成。
 
 ## AI SDK 对 Lime 的启发
 

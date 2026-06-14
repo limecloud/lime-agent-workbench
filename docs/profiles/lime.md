@@ -47,6 +47,25 @@ App surface / Electron Desktop Host bridge
   -> Tool / Skill / Workspace / Artifact / Evidence / Policy services
 ```
 
+Claw 与 Agent App 对话不再拥有第二套 runtime。当前唯一对话主链是：
+
+```text
+Frontend / Claw / Agent App
+  -> runtime client / session gateway
+  -> App Server agentSession/*
+  -> RuntimeCore
+  -> ExecutionBackend
+  -> RuntimeEvent schema + sequence gate
+  -> ThreadReadModel
+  -> AgentUI projection
+```
+
+这条链路的工程含义：
+
+- `current`：App Server JSON-RPC、RuntimeCore、ExecutionBackend、AgentUI projection、evidence/replay/review。
+- `compat`：旧 `agent_runtime_*` facade、产品本地 session shell、历史 adapter。它们只允许委托和形状投影。
+- `dead`：生产 mock fallback、UI 本地 runtime truth、产品应用直连 Provider、第二套 tool/action/projection owner。
+
 ## 必需事实
 
 Lime 剖面核心要求这些事件族：
@@ -92,3 +111,8 @@ Lime 剖面核心要求这些事件族：
 - 产品应用 不得把 retired desktop command path 当 current API。
 - UI-only state 不能修改 runtime truth。
 - Evidence/replay/review 必须消费同一组 runtime facts。
+- RuntimeCore 拥有 session 单 active turn gate；UI/SDK 不能用本地队列合并并发 turn 后再伪造完成态。
+- Tool lifecycle 必须由 RuntimeCore / provider core 统一拥有；MCP、ACP、skills、shell、project tools 不能各自输出不相邻、不可 replay 的结果。
+- RuntimeCore event append 必须 batch atomic；坏事件不能部分写入 `StoredSession.events` 或提前推进 turn/read model。
+- Tool lifecycle owner guard、approval gate 和 tool owner adjacency 是 Claw loop 的后端事实源，不是 AgentUI projection 的补丁逻辑。
+- RuntimeBackend 必须把 `ToolEnd { result.success: false }` 输出为 `tool.failed`，保留 `failureCategory` / `error` / `output`；失败工具不能被 Claw UI 或 AgentUI projection 当成成功 `tool.result`。

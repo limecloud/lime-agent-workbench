@@ -33,9 +33,11 @@ export function projectAgentUiState<TEvent extends AgentRuntimeExecutionEvent>(
 | `artifacts` | artifact refs。 |
 | `evidence` | evidence refs。 |
 | `diagnostics` | failed / blocked / runtime error facts。 |
-| `teamWorkbench` | subagent / worker / task / handoff / review facts 聚合后的团队工作台模型。 |
+| `subagents` | subagent / worker / task / handoff / review facts 聚合后的 Subagents 模型。 |
 | `readModel` | 可水合读模型。 |
 | `hydration` | projection 当前水合状态与 event count。 |
+
+如果输入包含 `state.delta`，projector 会在普通 runtime facts 投影后按顺序应用 patch。`target: "projection"` 可修复 UI state 子树，`target: "readModel"` 可修复 read model cache；batch `projectAgentUiState()` 与 incremental `createAgentUiProjector.apply()` 使用同一归并逻辑。
 
 ## createAgentUiProjector
 
@@ -56,8 +58,40 @@ projector.reset();
 | --- | --- |
 | `getState()` | 返回当前 projection state。 |
 | `hydrate(input)` | 用新的 events / sourceCount 替换当前状态。 |
-| `apply(event)` | 通过 event id 幂等追加事件并重新投影。 |
+| `apply(event)` | 通过 event id 幂等追加事件，并用增量 accumulator 更新 messages / timeline / graph / readModel / subagents；`state.delta` 会在 snapshot 后持久归并；重复 event 直接返回当前 state。 |
 | `reset()` | 清空 runtime facts 和 projection state。 |
+
+## State Delta Apply
+
+`state.delta` 使用 RFC 6902 JSON Patch 子集：`add`、`replace`、`remove`、`test`、`copy`、`move`。
+
+```ts
+projector.apply({
+  id: "evt-delta",
+  kind: "state",
+  status: "completed",
+  eventClass: "state.delta",
+  title: "Repair subagent projection",
+  runtimeId: "runtime_1",
+  sequence: 42,
+  payload: {
+    target: "projection.subagents",
+    patch: [
+      { op: "replace", path: "/threads/0/status", value: "completed" },
+      { op: "add", path: "/threads/0/summary", value: "已完成资料整理" }
+    ]
+  },
+  createdAt: "2026-06-12T00:00:00.000Z"
+});
+```
+
+边界：
+
+- patch 只能作用在 schema 已知 projection / readModel 子树。
+- patch 不能修改 `readModel.events`、`readModel.visibleEvents` 或 `readModel.pendingActions` 来伪造 runtime fact。
+- patch 失败不会污染目标 state；projector 会把 `hydration.status` 标为 `stale`，并写入 `diagnostics`。
+- `projection.subagents` patch 后会同步重算 `activeThreadIds`、`completedThreadIds`、`failedThreadIds`。
+- 后续同子树 runtime facts 优先于较早的 `state.delta`，避免修复事件覆盖更新的事实。
 
 ## Streaming Merge
 
@@ -75,32 +109,34 @@ projector.reset();
 
 当 `model.completed` 或 completed status 到达时，message part 状态转为 `final`。
 
-## Team Workbench Projection
+## Subagents Projection
 
-Projector 必须始终输出 `state.teamWorkbench`。没有 team facts 时输出空模型：
+Projector 必须始终输出 `state.subagents`。没有 subagent facts 时输出空模型：
 
 ```ts
 {
-  hasTeamSurface: false,
-  rosterNodes: [],
-  workItems: [],
-  handoffEvents: [],
-  reviewEvents: [],
-  laneEvents: []
+  hasSubagents: false,
+  threads: [],
+  delegationCalls: [],
+  activities: [],
+  activeThreadIds: [],
+  completedThreadIds: [],
+  failedThreadIds: []
 }
 ```
 
-有 `task.*`、`subagent.*`、`worker.*`、`handoff.*`、`review.*` facts 时，projection 负责把它们归入 `AgentUiTeamWorkbenchModel`：
+有 `task.*`、`subagent.*`、`worker.*`、`handoff.*`、`review.*` facts 时，projection 负责把它们归入 `AgentUiSubagentsModel`：
 
 | Runtime facts | Projection field |
 | --- | --- |
-| task / job / run / attempt facts | `workItems` |
-| subagent / worker facts | `rosterNodes` |
-| handoff facts | `handoffEvents` |
-| review facts and evidence refs | `reviewEvents` |
-| handoff + review ordered lane | `laneEvents` |
+| subagent / worker lifecycle | `threads` |
+| spawn / handoff / send input / wait / interrupt / close facts | `delegationCalls` |
+| started / interacted / handoff / review / completed facts | `activities` |
+| pending / running / blocked thread status | `activeThreadIds` |
+| completed thread status | `completedThreadIds` |
+| failed thread status | `failedThreadIds` |
 
-React surface 只读 `state.teamWorkbench`。如果 lineage 不完整，projector 应保留 diagnostic 或 degraded state，不能从正文猜 parent-child 关系。
+React surface 只读 `state.subagents`。如果 lineage 不完整，projector 应保留 diagnostic 或 degraded state，不能从正文猜 parent-child 关系。
 
 ## Runtime Status
 

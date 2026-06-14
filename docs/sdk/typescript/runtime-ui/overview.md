@@ -25,10 +25,10 @@ export {
   ExecutionGraphView,
   ArtifactRefList,
   EvidenceRefList,
-  TeamWorkbenchView,
-  TeamRosterView,
-  WorkBoardView,
-  HandoffLaneView,
+  SubagentsView,
+  SubagentThreadList,
+  SubagentDelegationList,
+  SubagentActivityList,
   RuntimeFactsPanel,
   RuntimeFactsSummary,
   ToolGroup,
@@ -44,17 +44,17 @@ export {
 | `UIMessagePartsView` | `UIMessagePart[]` | 消息、reasoning、tool preview、artifact/evidence 引用。 |
 | `ProcessTimelineView` | `ProcessTimelineEntry[]` | 过程时间线。 |
 | `ExecutionGraphView` | `ExecutionGraphNode[]` | task / subagent / tool / action 图。 |
-| `TeamWorkbenchView` | `AgentUiProjectionState` | 团队成员、工作板、移交 / review lane。 |
-| `TeamRosterView` | `ExecutionGraphNode[]` | subagent / worker 成员视图。 |
-| `WorkBoardView` | `ExecutionGraphNode[]` | task / job / run / attempt 工作项。 |
-| `HandoffLaneView` | projected handoff / review events | 移交、协作和评审事实。 |
+| `SubagentsView` | `AgentUiProjectionState.subagents` | 团队成员、工作板、移交 / review lane。 |
+| `SubagentThreadList` | `AgentUiSubagentThreadView[]` | 子代理线程列表。 |
+| `SubagentDelegationList` | `AgentUiSubagentDelegationView[]` | spawn / handoff 调用记录。 |
+| `SubagentActivityList` | `AgentUiSubagentActivityView[]` | 子代理活动轨迹。 |
 | `ArtifactRefList` | `AgentUiArtifactRefView[]` | artifact 引用列表，只输出打开意图。 |
 | `EvidenceRefList` | `AgentUiEvidenceRefView[]` | evidence 引用列表，只输出打开意图。 |
 | `ActionRequiredList` | projected action events | 人类介入。 |
 | `ToolGroup` | projected tool events | 工具调用摘要。 |
 | `RuntimeFactsPanel` | `AgentRuntimeReadModel` | read model facts 面板。 |
 
-这些 React surface 的标准输入分别来自 `UIMessageParts`、`ProcessTimeline`、`ExecutionGraph`、`ActionRequired`、`ArtifactRef`、`EvidenceRef`、`TeamWorkbench`。组件可以通过 labels 和 callbacks 注入产品行为，但不能把本地状态写回 runtime facts。
+这些 React surface 的标准输入分别来自 `UIMessageParts`、`ProcessTimeline`、`ExecutionGraph`、`ActionRequired`、`ArtifactRef`、`EvidenceRef`、`AgentUiProjectionState.subagents`。组件可以通过 labels 和 callbacks 注入产品行为，但不能把本地状态写回 runtime facts。
 
 ## Example
 
@@ -70,7 +70,7 @@ export function AgentPanel({ state, onResolveAction }) {
         messagePartsAriaLabel: "消息",
         processTimelineAriaLabel: "过程",
         executionGraphAriaLabel: "执行图",
-        teamWorkbenchAriaLabel: "团队工作台"
+        subagentsAriaLabel: "子代理"
       }}
     />
   );
@@ -85,7 +85,7 @@ export function AgentPanel({ state, onResolveAction }) {
 | 通过 callback 上报用户动作。 | 本地标记 action resolved。 |
 | 注入 labels / formatting callbacks。 | 硬编码产品五语言文案。 |
 | 展示 refs。 | 复制 artifact / evidence 大 payload。 |
-| 缺少 subagent facts 时不渲染 Team Workbench。 | 伪造 teammate、handoff 或 review。 |
+| 缺少 subagent facts 时不渲染 Subagents surface。 | 伪造 teammate、handoff 或 review。 |
 
 ## 关键参考页
 

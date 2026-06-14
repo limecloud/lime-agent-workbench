@@ -46,7 +46,7 @@ Lime 不排斥外部协议，但内部标准必须服务现有代码库和治理
 | Agent ↔ 用户界面 | AG-UI、assistant-ui | Lime AgentUI 投影契约。 |
 | Agent ↔ Runtime 事实 | OpenAI Agents SDK、LangGraph、AI SDK streams | Lime AgentRuntime 剖面、RuntimeEvent、ThreadReadModel、TaskSnapshot。 |
 | Agent ↔ 工具与数据 | MCP、tool calling schemas | App Server capability gateway、Tool inventory、Policy/Permission/Sandbox facts。 |
-| Agent ↔ Agent | A2A、多代理 Runtime | RuntimeCore task/subagent/job/channel facts 与 Team Workbench 投影。 |
+| Agent ↔ Agent | A2A、多代理 Runtime | RuntimeCore task/subagent/job/channel facts 与 `AgentUiProjectionState.subagents` 投影。 |
 | Evidence / Replay / Review | tracing、eval、observability | Lime evidence/replay/review refs，必须能通过 runtime correlation ids join。 |
 
 外部协议只能作为参考。只要进入 Lime 产品主链，写入边界就必须回到 App Server / RuntimeCore；UI 只能消费事实并投影。
@@ -228,6 +228,7 @@ UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、ActionRequired�
 - [核心架构](/concepts/architecture)
 - [Runtime 事件契约](/contracts/runtime-event)
 - [UI 投影契约](/contracts/ui-projection)
+- [Coding 剖面](/profiles/coding)
 - [Process Projection 草案](/drafts/process-projection)
 - [Content Studio 接入教程](/tutorials/content-studio)
 
@@ -236,6 +237,7 @@ UIMessageParts、ProcessTimeline、ExecutionGraph、ToolGroup、ActionRequired�
 | 资源 | 用途 |
 | --- | --- |
 | [Lime AgentRuntime 剖面](/profiles/lime) | Lime current runtime 的严格产品剖面。 |
+| [Coding 剖面](/profiles/coding) | 编程型 Agent 工作台的工具、权限、投影和验收剖面。 |
 | [Content Studio 剖面](/profiles/content-studio) | 第一个重点产品接入样板。 |
 | [治理规则](/concepts/governance) | current / compat / deprecated / dead 分类。 |
 | [路线图](/development/roadmap) | Workbench 标准化阶段。 |

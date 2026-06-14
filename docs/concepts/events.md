@@ -21,7 +21,7 @@ Lime 采用事件流的原因不是为了“看起来实时”，而是为了让
 | Context / history | `context.*`、`history.*`、`snapshot.updated` | context chips、hydration、repair state。 |
 | Routing / limits | `routing.*`、`cost.*`、`quota.*`、`rate_limit.hit` | model chip、cost/limit summary。 |
 | Artifacts / evidence | `artifact.changed`、`evidence.changed` | artifact workspace、timeline evidence、review lane。 |
-| Team / background | `subagent.*`、`job.*`、`channel.*` | team roster、work board、remote teammate。 |
+| Subagents / background | `subagent.*`、`job.*`、`channel.*` | SubagentsView、delegation graph、remote thread。 |
 | Diagnostics | `runtime.warning`、`runtime.error`、metrics | diagnostics surface。 |
 
 ## 生命周期详解
@@ -33,7 +33,7 @@ turn.submitted
 turn.started
 run.status(planning)
 run.status(acting)
-turn.completed | turn.failed | turn.cancelled
+turn.completed | turn.failed | turn.canceled
 snapshot.updated
 ```
 
@@ -67,10 +67,10 @@ output.spilled?
 ```text
 action.required
 action.updated?
-action.resolved | action.cancelled | action.expired
+action.resolved | action.cancelled | action.canceled | action.expired
 ```
 
-审批和结构化输入不能只存在于 React state。UI 可以乐观显示用户选择，但必须等待 RuntimeCore 或 action owner 返回 resolved 事实。
+审批和结构化输入不能只存在于 React state。UI 可以乐观显示用户选择，但必须等待 RuntimeCore 或 action owner 返回 action terminal 事实。
 
 ### Artifact / Evidence
 

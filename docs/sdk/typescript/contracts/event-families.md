@@ -13,17 +13,17 @@ Lime AgentUI 的事件标准参考成熟 streaming SDK 的页面颗粒度，但�
 
 | Family | Event class | Required scope | Projection output | Validation focus |
 | --- | --- | --- | --- | --- |
-| Lifecycle | `session.created`、`turn.submitted`、`turn.started`、`turn.completed`、`turn.failed` | `threadId`、`turnId` | `runtime`、`timeline`、`readModel` | terminal event 不重复、失败分类稳定。 |
+| Lifecycle | `session.created`、`turn.submitted`、`turn.started`、`turn.completed`、`turn.failed`、`turn.canceled` | `threadId`、`turnId` | `runtime`、`timeline`、`readModel` | terminal event 不重复、失败分类稳定。 |
 | Model output | `model.requested`、`model.delta`、`model.completed`、`model.failed` | `messageId` in payload，建议带 `turnId` | `UIMessageParts` | delta 合并、final reconciliation、文本不重复。 |
 | Reasoning | `reasoning.started`、`reasoning.delta`、`reasoning.completed` | `messageId` 或 `taskId` | `UIMessageParts.reasoning`、`ProcessTimeline` | 不泄露不可展示推理；只展示 summary。 |
 | Tool | `tool.started`、`tool.result`、`tool.failed`、`tool.catalog.resolved` | `toolCallId` | `ToolGroup`、`ProcessTimeline`、`ExecutionGraph` | tool scope 必填，大输出走 refs。 |
-| Action / HITL | `action.required`、`action.resolved` | `actionId` | `ActionRequired`、runtime waiting/completed | 点击不本地完成，必须等 runtime fact。 |
+| Action / HITL | `action.required`、`action.resolved`、`action.cancelled`、`action.canceled`、`action.expired` | `actionId` | `ActionRequired`、runtime waiting/completed | 点击不本地完成，必须等 runtime fact；孤立 terminal fail closed。 |
 | Permission / sandbox | `permission.requested`、`permission.resolved`、`sandbox.applied`、`sandbox.violation` | `actionId` 或 `taskId` | `ActionRequired`、`diagnostics` | policy reason code 稳定。 |
 | Context | `context.resolved`、`context.failed` | `threadId` 或 `taskId` | summary、diagnostics | 输入源数量与错误可恢复。 |
 | Artifact | `artifact.changed`、`artifact.versioned`、`artifact.exported` | `artifactId` 或 `artifactRefs[]` | `ArtifactRefList`、message artifact card | 不内联大 payload。 |
 | Evidence / review | `evidence.changed`、`evidence.exported`、`review.verdict` | `evidenceId`、`reviewId` | `EvidenceRefList`、review lane | 保留 replay / review correlation。 |
 | Snapshot / repair | `snapshot.updated`、`stream.repaired` | `threadId`、cursor | hydration、read model repair | gap 检测、幂等去重。 |
-| Team / subagent | `task.created`、`subagent.started`、`handoff.requested`、`review.verdict` | `taskId`、`subagentId`、`handoffId`、`reviewId` | `TeamWorkbench`、`ExecutionGraph` | lineage 不能由正文猜测。 |
+| Subagents | `task.created`、`subagent.started`、`handoff.requested`、`review.verdict` | `taskId`、`subagentId`、`handoffId`、`reviewId` | `AgentUiProjectionState.subagents`、`ExecutionGraph` | lineage 不能由正文猜测。 |
 | Diagnostics | `runtime.error`、`transport.error` | `threadId` 或 `turnId` | `diagnostics`、runtime failed/stale | 错误 code 稳定，不吞掉 transport failure。 |
 
 ## Scope id 规则

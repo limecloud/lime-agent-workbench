@@ -61,7 +61,7 @@ export interface AppServerFactsProjectionResult {
 | turn completed | `turn.completed` |
 | event `message.delta` / model payload | `model.delta` |
 | tool payload | `tool.started` / `tool.result` / `tool.failed` |
-| action payload | `action.required` / `action.resolved` |
+| action payload | `action.required` / action terminal |
 | artifact summary | `artifact.changed` |
 | evidence pack summary | `evidence.changed` |
 
@@ -89,4 +89,3 @@ App Server method 或 bridge 变更还要运行：
 ```bash
 npm run test:contracts
 ```
-

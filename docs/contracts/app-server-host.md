@@ -22,6 +22,33 @@ App Server 是 Lime runtime current 写入边界。Desktop Host 和 产品应用
 - 提供 `agentSession/turn/start`、`agentSession/event`、`agentSession/read` 等 current API。
 - 写入 runtime events、read models、artifact/evidence refs。
 - 对 产品应用 fail closed，不从本地 key/env key 偷读凭证。
+- 拥有同一 session 的 active turn gate：已有 active / queued / waiting turn 时，必须由 RuntimeCore 队列化或返回结构化错误，不能让 UI、SDK 或产品应用自行合并并发 turn。
+- 拥有 RuntimeEvent 入库门禁：schema、sequence、tool lifecycle、approval gate 和 batch atomic append 必须在写入 `StoredSession.events` / read model 前完成。
+
+## Claw / Agent App current loop
+
+Claw、Agent App 对话和其它产品应用都必须进入同一条写入链：
+
+```text
+Product UI / Claw / Agent App
+  -> @limecloud/agent-runtime-client 或产品侧 session gateway
+  -> agentSession/start
+  -> agentSession/turn/start
+  -> RuntimeCore
+  -> ExecutionBackend / provider / tool services
+  -> RuntimeEvent + ThreadReadModel + EvidenceRef
+  -> AgentUI projection
+```
+
+固定约束：
+
+- `agentSession/turn/start` 是对话 turn 的唯一 current 写入口；旧 `agent_runtime_*` 或产品本地 adapter 只能作为 compat facade 委托到这条链，不得承接新业务逻辑。
+- 同一 session 同时只能有一个 RuntimeCore-owned active turn；需要排队时由 runtime queue 显式记录，不能依赖前端 `queue_if_busy` 或本地状态兜底。
+- `TurnAlreadyActive` 这类并发拒绝必须作为 App Server / RuntimeCore 结构化错误暴露，UI 只能显示 blocked / queued / failed 状态，不能启动第二条隐藏 backend turn。
+- `turn.completed`、`turn.failed`、`turn.canceled` 是 turn 终态事实；UI 不得用 timeout、固定 grace timer 或 assistant 正文来合成完成态。
+- 同一批 RuntimeEvent 必须先完整验证再入库；任一事件违反 schema、sequence、tool lifecycle、approval 或 owner 归属规则时，整批 fail closed，不能把前序事件部分写入 session state。
+- 带 `toolCallId` 的 `tool.args`、`tool.args.delta`、`tool.output.delta`、`tool.result`、`tool.failed`、`action.required`、`permission.denied`、`sandbox.blocked` 必须关联 active `tool.started`；未批准或被拒绝的 action 不能被 UI 或 adapter 乐观转换成成功工具结果。
+- 生产路径禁止 App Server mock backend、renderer mock fallback 或 fixture 自动替代；fixture 只服务 conformance 和 smoke。
 
 ## Current JSON-RPC 面
 
@@ -91,6 +118,7 @@ Host Snapshot 不是 runtime read model。它描述平台宿主状态，不描�
 | Host capability missing | 标记 unavailable，提示进入平台设置或 standalone fallback。 |
 | Runtime stream interrupted | UI 标记 stale 并走 read model repair。 |
 | Action unresolved | 保持 waiting，不当作 approved。 |
+| Turn already active | RuntimeCore 返回结构化 busy / already-active 错误，或显式排队；UI 不合并并发 turn。 |
 | Mock backend only | 生产路径 fail closed。 |
 
 ## Mock 与 hosted mode

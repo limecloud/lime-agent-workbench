@@ -52,7 +52,7 @@ export type AgentRuntimeActionResolver<TEvent = AgentRuntimeExecutionEvent> = (
 3. React renders action button.
 4. User clicks button; React calls `onResolveAction`.
 5. Product app calls `runtime.respondAction`.
-6. Runtime emits `action.resolved`.
+6. Runtime emits action terminal.
 7. Projection removes or completes action.
 
 ## 禁止事项
@@ -61,4 +61,3 @@ export type AgentRuntimeActionResolver<TEvent = AgentRuntimeExecutionEvent> = (
 - 不把 pending UI 当 resolved fact。
 - 不把 action label 写死在 package 内；产品 shell 注入 labels。
 - 不从 assistant text 识别“我同意/拒绝”来完成 action。
-

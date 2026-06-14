@@ -35,6 +35,7 @@ interface AgentUiProjectionState {
   artifacts: ArtifactRefView[];
   evidence: EvidenceRefView[];
   diagnostics: DiagnosticView[];
+  subagents: SubagentsViewModel;
   hydration: HydrationState;
   ui: LocalUiState;
 }
@@ -51,8 +52,8 @@ interface AgentUiProjectionState {
 | `reasoning.*` | UIMessageParts reasoning part、ProcessTimeline reasoning entries。 |
 | `tool.*`、`process.*` | ToolGroup、ProcessTimeline entries、ExecutionGraph step/tool nodes。 |
 | `action.*`、`permission.*` | ActionRequired、TaskCapsule attention。 |
-| `task.*`、`queue.changed` | TaskCapsule、work board。 |
-| `subagent.*`、`job.*`、`channel.*` | ExecutionGraph、Team Workbench surfaces。 |
+| `task.*`、`queue.changed` | TaskCapsule、projection activity。 |
+| `subagent.*`、`job.*`、`channel.*`、`handoff.*`、`review.*` | ExecutionGraph、`AgentUiProjectionState.subagents`、SubagentsView。 |
 | `artifact.changed` | ArtifactRef、artifact workspace。 |
 | `evidence.changed` | EvidenceRef、review/replay/ProcessTimeline evidence lane。 |
 | `snapshot.updated` | Hydration/reconciliation。 |

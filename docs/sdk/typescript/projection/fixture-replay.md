@@ -22,6 +22,8 @@ export interface AgentUiFixtureReplayResult<TEvent = AgentRuntimeExecutionEvent>
   fixtureId: string;
   state: AgentUiProjectionState<TEvent>;
   validationIssues: AgentUiContractValidationIssue[];
+  sequenceViolations: RuntimeSequenceViolation[];
+  failedClosed: boolean;
   diagnostics: string[];
   passed: boolean;
 }
@@ -52,10 +54,10 @@ Replay 当前检查：
 | graph count | `expected.graphNodeCount` 下限。 |
 | pending action count | `expected.pendingActionCount` 精确值。 |
 | artifact / evidence count | refs 下限。 |
-| team workbench counts | `expected.teamWorkbench` 中 roster、work item、handoff、review、lane count。 |
+| subagents counts | `expected.subagents` 中 thread、delegation call、activity 和线程状态 count。 |
 | expected diagnostics | 允许特定 repair / failure diagnostics。 |
 
-`teamWorkbench` 是必填 projection state 字段。Replay 对没有 team facts 的 fixture 也应确认它存在，并且 `hasTeamSurface` 与空数组一致。
+`subagents` 是必填 projection state 字段。Replay 对没有 subagent facts 的 fixture 也应确认它存在，并且 `hasSubagents` 与空数组一致。旧 `teamWorkbench` seed 名称不能作为 current state owner。
 
 ## Required Fixtures
 

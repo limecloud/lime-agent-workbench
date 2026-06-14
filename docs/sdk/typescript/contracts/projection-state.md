@@ -22,7 +22,7 @@ description: AgentUiProjectionState 字段、不变量和 React 输入合同。
 | `artifacts` | read model projection | `ArtifactRefList` | 只保存轻量 ref，不含大 payload。 |
 | `evidence` | read model projection | `EvidenceRefList` | 保留 review/replay/evidence correlation。 |
 | `diagnostics` | projection | diagnostics / degraded UI | failed、blocked、runtime.error 可见。 |
-| `teamWorkbench` | projection | `TeamWorkbenchView` | 必填；solo run 输出空模型。 |
+| `subagents` | projection | `SubagentsView` | 必填；solo run 输出空模型。 |
 | `readModel` | App Server / projection | hydration、summary | 可水合，但不替代 event stream。 |
 | `hydration` | projection | root status / repair UI | 标记 idle/live/stale/repairing/degraded。 |
 | `ephemeralUi` | product shell | focus/collapse 等局部 UI | 不得写 runtime truth。 |
@@ -53,22 +53,23 @@ description: AgentUiProjectionState 字段、不变量和 React 输入合同。
 
 Streaming 合并在 projection 层完成。React 不合并 delta，不从工具结果正文猜状态。
 
-## Team Workbench
+## Subagents
 
-`teamWorkbench` 是必填字段：
+`subagents` 是必填字段：
 
 ```ts
 {
-  hasTeamSurface: false,
-  rosterNodes: [],
-  workItems: [],
-  handoffEvents: [],
-  reviewEvents: [],
-  laneEvents: []
+  hasSubagents: false,
+  threads: [],
+  delegationCalls: [],
+  activities: [],
+  activeThreadIds: [],
+  completedThreadIds: [],
+  failedThreadIds: []
 }
 ```
 
-没有 team facts 时用空模型表达 solo run；有 task/subagent/handoff/review facts 时，projection 必须提前构建 roster、work board 和 lane。React 不能从 `graph` 或 `visibleEvents` 重新过滤出团队模型。
+没有 subagent facts 时用空模型表达 solo run；有 task/subagent/handoff/review facts 时，projection 必须提前构建 threads、delegation calls 和 activities。React 不能从 `graph` 或 `visibleEvents` 重新过滤出团队模型。旧 `teamWorkbench` 名称只作为 compat seed，不承接 current owner。
 
 ## Ref views
 

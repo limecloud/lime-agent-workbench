@@ -26,7 +26,7 @@ Lime 统一的是 AgentUI / AgentRuntime 标准，不是把所有能力塞进一
 | `@limecloud/agent-ui-contracts` | TypeScript types、fixtures、validation、message/timeline/graph/projection contracts。 | React、transport、Provider、产品业务逻辑。 |
 | `@limecloud/agent-runtime-client` | App Server JSON-RPC facade、session gateway、event subscription、read APIs、action response、evidence export。 | ProjectionState、React component、工具状态机。 |
 | `@limecloud/agent-runtime-projection` | projector、fixture replay、App Server facts adapter、read model projection、message/timeline/graph derivation。 | DOM、React hooks、App Server JSON-RPC、Provider Store。 |
-| `@limecloud/agent-runtime-ui` | React projection view、message parts、process timeline、execution graph、action required、team workbench。 | runtime truth、stream subscription、Provider key、DB 读取。 |
+| `@limecloud/agent-runtime-ui` | React projection view、message parts、process timeline、execution graph、action required、SubagentsView。 | runtime truth、stream subscription、Provider key、DB 读取。 |
 
 ## 标准 surface
 
@@ -40,9 +40,9 @@ SDK 文档和包导出统一使用以下 surface 名称：
 | `ActionRequired` | `@limecloud/agent-ui-contracts` | `state.actions` | `ActionRequiredList` |
 | `ArtifactRef` | `@limecloud/agent-ui-contracts` | `state.artifacts` | Artifact lane / product callback |
 | `EvidenceRef` | `@limecloud/agent-ui-contracts` | `state.evidence` | Evidence lane / product callback |
-| `TeamWorkbench` | `AgentUiTeamWorkbenchModel` | `state.teamWorkbench` | `TeamWorkbenchView` |
+| `Subagents` | `AgentUiSubagentsModel` | `state.subagents` | `SubagentsView` |
 
-产品应用可以组合这些 surface，但不能新增第二套标准事实源。Runtime client 只提供 runtime facts；projection 才生成 surface state；React 只渲染 projection state。
+产品应用可以组合这些 surface，但不能新增第二套标准事实源。Runtime client 只提供 runtime facts；projection 才生成 surface state；React 只渲染 projection state。旧 `TeamWorkbenchView` / `teamWorkbench` 只是历史命名，不再作为 current owner 或可用导出。
 
 ## 代码组织要求
 
@@ -75,7 +75,7 @@ packages/
       processTimeline.tsx
       executionGraph.tsx
       runtimeFacts.tsx
-      teamWorkbench.tsx
+      subagents.tsx
 ```
 
 每个包内部继续按领域拆分，避免把 reducer、component、transport 写在一个文件里。`src/index.ts` 只做 barrel exports。
@@ -99,9 +99,9 @@ packages/
 | `packages/agent-ui-contracts` | `@limecloud/agent-ui-contracts` | `current` | 继续补 schema、fixture、validation 和 version contract。 |
 | `packages/agent-runtime-client` | `@limecloud/agent-runtime-client` | `current` | 完整覆盖 App Server runtime client facade，不生成 UI state。 |
 | `packages/agent-runtime-projection` | `@limecloud/agent-runtime-projection` | `current` | App Server facts、fixture replay、projection selectors 都进入该包。 |
-| `packages/agent-runtime-ui` | `@limecloud/agent-runtime-ui` | `current` | Message、Timeline、ExecutionGraph、ActionRequired、TeamWorkbench 都从该包复用。 |
+| `packages/agent-runtime-ui` | `@limecloud/agent-runtime-ui` | `current` | Message、Timeline、ExecutionGraph、ActionRequired、SubagentsView 都从该包复用。 |
 | `packages/app-server-client` | runtime client dependency | `current dependency` | 不直接作为 AgentUI package 暴露给产品应用。 |
-| 产品应用 local process component | `@limecloud/agent-runtime-ui` shared surfaces | `deprecated` | Shared ProcessTimeline / ExecutionGraph / TeamWorkbench 接入后删除。 |
+| 产品应用 local process component | `@limecloud/agent-runtime-ui` shared surfaces | `deprecated` | Shared ProcessTimeline / ExecutionGraph / SubagentsView 接入后删除。 |
 
 ## 版本策略
 
@@ -124,7 +124,7 @@ export type {
   UIMessagePart,
   ProcessTimelineEntry,
   ExecutionGraphNode,
-  AgentUiTeamWorkbenchModel
+  AgentUiSubagentsModel
 };
 export {
   getAgentUiFixture,
@@ -148,7 +148,7 @@ export {
   ProcessTimelineView,
   ExecutionGraphView,
   ActionRequiredList,
-  TeamWorkbenchView
+  SubagentsView
 };
 ```
 

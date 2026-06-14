@@ -30,6 +30,7 @@ Product App
 | Host bridge session gateway | current | Renderer 安全适配；不泄露 Provider key。 |
 | `nextEvent` / `drainEvents` | current for tests/bridge | 只消费 `agentSession/event` notification。 |
 | Fixture replay | test-only | 不进入 production fallback。 |
+| SSE / protobuf / Accept negotiation | future gateway candidate | 只允许作为外部 HTTP gateway compatibility 层评估；不是 Lime 本体 current transport。 |
 | Direct Provider SDK | dead | 产品应用和 UI 包禁止直连。 |
 
 ## 方法合同
@@ -51,7 +52,7 @@ Production transport 失败时禁止：
 - 切到 fixture replay。
 - 返回空 read model 伪成功。
 - 从产品本地 key / env key 重试 Provider。
-- 在 UI 层制造 `turn.completed` 或 `action.resolved`。
+- 在 UI 层制造 `turn.completed` 或 action terminal。
 
 应返回或抛出稳定错误，让产品应用显示 `blocked`、`needs-setup`、`unavailable` 或 diagnostics。
 
@@ -70,6 +71,8 @@ Production transport 失败时禁止：
 ```
 
 非 `agentSession/event` notification 不进入 Agent Runtime event router。transport 不做 projection，不合并文本，不重排工具状态。
+
+v2.9 后，event router 会消费 adapter / middleware 的 `0..N` 输出和 flush 结果；这只是 transport 兼容层的 fan-out，不改变 durable owner。Lime 本体 current transport 仍是 App Server JSON-RPC / Host bridge，不宣称兼容 AG-UI SSE 或 protobuf wire protocol。
 
 ## 验证入口
 

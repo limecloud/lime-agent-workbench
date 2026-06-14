@@ -1,6 +1,27 @@
 import { defineConfig } from "vitepress";
+import { readFileSync } from "node:fs";
 
 const repoBase = process.env.VITEPRESS_BASE ?? "/lime-agent-workbench/";
+const faviconSvg = readFileSync(new URL("../public/logo.svg", import.meta.url));
+
+function serveRootFavicon(
+  req: { url?: string },
+  res: {
+    statusCode: number;
+    setHeader(name: string, value: string): void;
+    end(data: Buffer): void;
+  },
+  next: () => void
+) {
+  if (req.url?.split("?")[0] !== "/favicon.ico") {
+    next();
+    return;
+  }
+
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "image/svg+xml");
+  res.end(faviconSvg);
+}
 
 export default defineConfig({
   lang: "zh-CN",
@@ -29,6 +50,19 @@ export default defineConfig({
           : self.renderToken(tokens, idx, options);
       };
     }
+  },
+  vite: {
+    plugins: [
+      {
+        name: "workbench-root-favicon",
+        configureServer(server) {
+          server.middlewares.use(serveRootFavicon);
+        },
+        configurePreviewServer(server) {
+          server.middlewares.use(serveRootFavicon);
+        }
+      }
+    ]
   },
   themeConfig: {
     logo: "/logo.svg",
@@ -90,6 +124,9 @@ export default defineConfig({
           { text: "Lime Agent 总览", link: "/introduction" },
           { text: "MCP、A2A 与 AG-UI", link: "/agentic-protocols" },
           { text: "Subagents 标准", link: "/subagents" },
+          { text: "Coding 剖面", link: "/profiles/coding" },
+          { text: "Subagents 活体闭环", link: "/examples/subagents-live-loop" },
+          { text: "活体 Demo 矩阵", link: "/examples/live-matrix" },
           {
             text: "Quickstart",
             collapsed: false,
@@ -172,7 +209,8 @@ export default defineConfig({
                   { text: "Event Families", link: "/sdk/typescript/contracts/event-families" },
                   { text: "Projection State", link: "/sdk/typescript/contracts/projection-state" },
                   { text: "Fixtures", link: "/sdk/typescript/contracts/fixtures" },
-                  { text: "Validation", link: "/sdk/typescript/contracts/validation" }
+                  { text: "Validation", link: "/sdk/typescript/contracts/validation" },
+                  { text: "Sequence Verifier", link: "/sdk/typescript/contracts/sequence-verifier" }
                 ]
               },
               {
@@ -184,6 +222,7 @@ export default defineConfig({
                   { text: "Session Gateway", link: "/sdk/typescript/runtime-client/session-gateway" },
                   { text: "Transport Contract", link: "/sdk/typescript/runtime-client/transport" },
                   { text: "Events Subscription", link: "/sdk/typescript/runtime-client/events" },
+                  { text: "Middleware / Adapter", link: "/sdk/typescript/runtime-client/middleware-adapter" },
                   { text: "Errors", link: "/sdk/typescript/runtime-client/errors" }
                 ]
               },
@@ -211,7 +250,7 @@ export default defineConfig({
                   { text: "Action Required", link: "/sdk/typescript/runtime-ui/action-required" },
                   { text: "Artifact / Evidence Refs", link: "/sdk/typescript/runtime-ui/refs" },
                   { text: "Callbacks", link: "/sdk/typescript/runtime-ui/callbacks" },
-                  { text: "Team Workbench", link: "/sdk/typescript/runtime-ui/team-workbench" }
+                  { text: "Subagents / Team Workbench compat", link: "/sdk/typescript/runtime-ui/team-workbench" }
                 ]
               },
               {
@@ -241,6 +280,12 @@ export default defineConfig({
             items: [
               { text: "事件 Schema", link: "/sdk/schemas/runtime-event" },
               { text: "投影 Schema", link: "/sdk/schemas/ui-projection" }
+            ]
+          },
+          {
+            text: "Examples",
+            items: [
+              { text: "Subagents 活体闭环", link: "/examples/subagents-live-loop" }
             ]
           }
         ]

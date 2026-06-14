@@ -39,11 +39,11 @@ model.delta
 tool.started?
 tool.progress?
 action.required?
-action.resolved?
+action.resolved | action.cancelled | action.canceled | action.expired?
 artifact.changed?
 evidence.changed?
 model.completed
-turn.completed | turn.failed
+turn.completed | turn.failed | turn.canceled
 snapshot.updated
 ```
 
@@ -54,6 +54,7 @@ snapshot.updated
 - Permission、sandbox、routing、quota、cost、retry 必须成为 runtime facts。
 - 失败要有可分类的 `runtime.error`、`tool.failed`、`model.failed` 或 `turn.failed`。
 - 没有事实时不要让 UI 猜；显式输出 unavailable 或 validation failure。
+- 有副作用的工具必须进入统一 tool lifecycle：`tool.started -> tool.result/failed`。需要人类决策时先输出 `action.required`，由 runtime fact 收口，不能由 UI 或 provider adapter 乐观完成。
 
 ## 执行型 runtime 适配
 
@@ -64,12 +65,32 @@ snapshot.updated
 | Reasoning / plan item | `reasoning.delta`、`reasoning.summary`、`plan.*`。 |
 | MCP / function tool call | `tool.started`、`tool.args`、`tool.result` 或 `tool.failed`。 |
 | Exec / apply patch / file change | `tool.*` + `permission.*` + `artifact.changed`。 |
-| Approval / guardian prompt | `action.required`，resolved 后输出 `action.resolved`。 |
+| Approval / guardian prompt | `action.required`，处理后输出 `action.resolved`；取消、撤回或超时输出 `action.cancelled / action.canceled / action.expired`。 |
 | Sandbox block / policy deny | `sandbox.blocked`、`permission.denied`、`runtime.warning/error`。 |
 | Context compaction | `history.compacted`、`context.attached`、`snapshot.updated`。 |
 | Session repair / rollout replay | `snapshot.updated`、read model cursor、EvidenceRef。 |
 
 适配器可以保留原生 item 为 raw diagnostics ref，但标准 UI 只能消费 Lime 投影状态。
+
+## Codex loop 对齐要求
+
+如果 provider 实现本地执行型 Agent loop，应参考 Codex 的 core 边界，而不是只参考 UI 流式事件：
+
+| Codex core 边界 | Lime provider 对齐要求 |
+| --- | --- |
+| Session 单 active turn / input queue | 同一 session 的 turn 所有权由 RuntimeCore 或 provider core 管理；已有 active / queued / waiting turn 时必须排队或结构化拒绝，不能由 UI 并发提交后自行合并。 |
+| ToolRouter | MCP / ACP / skills / shell / project tools 先进入统一 tool inventory 和 tool call parser。 |
+| ToolOrchestrator | approval、sandbox、attempt、retry、denial 都在 tool lifecycle 内统一处理。 |
+| CancellationToken | cancel 必须中断正在运行的工具，或把等待 action 收口为 action terminal。 |
+| Thread read / evidence | 每个副作用都有可 replay 的 RuntimeEvent、read model 和 evidence refs。 |
+
+Workbench 只接受上述结果事实：标准 RuntimeEvent、ThreadReadModel、TaskSnapshot、ArtifactRef、EvidenceRef。不要把 provider 内部对象、外部 SDK stream chunk 或 UI 本地状态直接暴露给 AgentUI。
+
+RuntimeCore 入库还必须是原子的：provider 一次输出的 runtime event batch 先通过 schema、sequence、tool lifecycle、approval gate 和 owner adjacency 检查，再整体写入。只要其中一条事件失败，整批拒绝，不能先写一部分再让 projection 或 read model 修补。
+
+工具调用的 owning assistant item 不能漂移。provider 如果输出 `messageId`、`itemId` 或 `assistantMessageId`，`tool.started` 与后续 `tool.args` / `tool.output.delta` / `tool.result` / `tool.failed` 必须一致；否则属于 tool owner adjacency violation。
+
+工具失败必须是 typed terminal fact：底层执行结果如果是 `success=false`，provider core / RuntimeBackend 必须输出 `tool.failed`，并携带 `toolCallId`、`status=failed`、`failureCategory`、`error` 和 `output`。不要输出 `tool.result` 再让 UI 从 error 字符串里推断失败。
 
 ## Provider adapter shape
 
@@ -112,6 +133,7 @@ LLM stream
 - 一个审批 turn 能挂起并通过 `respondAction` 恢复。
 - 一个失败 turn 能给出 failure category 和 recovery hint。
 - 断流后 read model 能修复 ProjectionState。
+- 一个并发 turn 场景能证明同一 session 不会启动第二个 backend turn：要么 queue，要么返回 `TurnAlreadyActive` / busy 类结构化错误。
 
 ## Provider conformance slice
 
@@ -157,4 +179,4 @@ emit({
 });
 ```
 
-子代理完成后，artifact/evidence refs 必须保留 `taskId / subagentId` correlation。UI 是否显示完整 Team Workbench 由 projection 决定，provider 不能用普通 assistant 正文代替这些 facts。
+子代理完成后，artifact/evidence refs 必须保留 `taskId / subagentId` correlation。UI 是否显示完整 Subagents surface 由 projection 决定，provider 不能用普通 assistant 正文代替这些 facts。

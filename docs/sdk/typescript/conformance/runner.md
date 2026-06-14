@@ -36,10 +36,10 @@ validate fixture
 | `text-basic` | lifecycle、stream delta、final text、snapshot completed。 |
 | `tool-success` | tool start/result、output ref、timeline、graph node。 |
 | `tool-failure` | failed tool、diagnostic、runtime failed/degraded。 |
-| `hitl-action` | action required/resolved、callback surface。 |
+| `hitl-action` | action required + action terminal、callback surface。 |
 | `artifact-evidence` | ArtifactRef / EvidenceRef projection 和 React refs。 |
 | `stream-repair` | sequence gap、snapshot repair、text 不重复。 |
-| `subagent-handoff` | task/subagent/handoff/review、TeamWorkbench。 |
+| `subagent-handoff` | task/subagent/handoff/review、SubagentsView。 |
 
 ## Report shape
 

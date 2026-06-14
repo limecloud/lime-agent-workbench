@@ -1,12 +1,20 @@
 {
   "name": "lime-agent-workbench",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev docs --host 127.0.0.1 --port 5177",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs --host 127.0.0.1 --port 4177"
+    "docs:preview": "vitepress preview docs --host 127.0.0.1 --port 4177",
+    "verify:subagents": "node scripts/verify-subagents-page.mjs"
+  },
+  "dependencies": {
+    "@limecloud/agent-runtime-projection": "file:../../aiclientproxy/lime/packages/agent-runtime-projection",
+    "@limecloud/agent-runtime-ui": "file:../../aiclientproxy/lime/packages/agent-runtime-ui",
+    "@limecloud/agent-ui-contracts": "file:../../aiclientproxy/lime/packages/agent-ui-contracts",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "mermaid": "^11.15.0",

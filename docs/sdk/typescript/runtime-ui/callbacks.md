@@ -25,12 +25,12 @@ action.required event
   -> ActionRequiredList button
   -> onResolveAction(event, action)
   -> AgentRuntimeClient.respondAction(...)
-  -> action.resolved event
+  -> action terminal event
   -> projection repair
   -> React rerender
 ```
 
-按钮点击后可以显示宿主自己的 pending UI，但 runtime fact 只有 `action.resolved` 或 read model repair 到达后才能变成 completed。
+按钮点击后可以显示宿主自己的 pending UI，但 runtime fact 只有 action terminal 或 read model repair 到达后才能变成 completed。
 
 ## Artifact / Evidence flow
 

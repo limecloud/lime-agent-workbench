@@ -13,7 +13,7 @@ description: Approval、interrupt、structured input 与 resume 的标准边界�
 action.required
   -> user approves / rejects / edits / answers
   -> respond_action
-  -> action.resolved
+  -> action.resolved | action.cancelled | action.canceled | action.expired
   -> runtime resumes or fails
 ```
 
@@ -51,8 +51,21 @@ interface ActionRequiredFact {
 
 - `actionId` 必须稳定。
 - 未解决 action 不能当作 approved。
-- UI optimistic state 必须在 runtime 返回 `action.resolved` 后 reconcile。
+- 未解决 action 默认阻断同 turn 的继续执行；除非 runtime 明确发出 resume / override fact，否则 UI 不能本地推进下一步。
+- UI optimistic state 必须在 runtime 返回 action terminal 后 reconcile。
 - delegated approval 必须显示请求来源：tool、subagent、task 或 remote teammate。
+
+## Resume Contract
+
+v2.10 已把 AG-UI active run / interrupt / resume 的机制落成 Lime 合同。`@limecloud/agent-ui-contracts` 暴露 `AgentRuntimeResumeContract` / `AgentRuntimeResumeActionDecision`，并提供 checked-in JSON Schema 与 validation API。Lime 本体的 `agentSession/thread/resume` 可接收 `resumeContract`；RuntimeCore 在启动 queued turn 前校验 schema version、session match 和 open action coverage，失败时 fail closed。
+
+- resume payload 必须覆盖目标 turn 内所有 open action，或者显式列出只恢复的 `actionId`。
+- `resumeMode=all-open-actions` 或 `selected-actions` 时，`decisions[].actionId` 必须覆盖 `openActionIds` 的全部 id。
+- action expiry 必须由 RuntimeEvent 表达，不能由 UI timeout 自动批准。
+- cancel / interrupt 必须产生 terminal 或 blocked fact；UI 不能只停掉 spinner。
+- 下一轮提交遇到 open action 时应 fail closed 或先要求 resume / cancel，不应静默开启并行隐式 run。
+
+这部分当前是合同和 Lime current path 接入，不表示所有 runtime provider 已支持自动 resume negotiation。
 
 ## 失败模式
 
